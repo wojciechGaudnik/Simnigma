@@ -1,7 +1,6 @@
+from Enigma_all.Enigma_v5.modules.core import EncryptNextDrum
 from Enigma_all.Enigma_v5.modules.tests_def import test_3d_2b
-
-
-
+from Enigma_all.Enigma_v5.modules.tools import create_drums
 
 key_enc = [1, 2, 2, 0, 1, 2, 3, 3, 3]
 key_test =[1, 0, 0, 0, True]
@@ -9,9 +8,19 @@ key_test =[1, 0, 0, 0, True]
 key_test[1:4] = key_enc[-6: -3]
 # print(key_test)
 
-
+drums = create_drums(8, True, 10)
 
 test_3d_2b()
+
+encrypt_drums = [EncryptNextDrum(drum) for drum in drums]
+# print(encrypt_drums[0].encrypt(enc))
+
+
+# objs = [MyClass() for i in range(10)]
+# for obj in objs:
+#     other_object.add(obj)
+#
+# objs[0].do_sth()
 
 
 

@@ -4,7 +4,9 @@ from Enigma_all.Enigma_v5.modules.core import (EncryptFirstDrum, EncryptNextDrum
 from Enigma_all.Enigma_v5.modules.tools import save_drums, load_drums
 from Enigma_all.Enigma_v5.modules.tests_def import sdfasdf
 
-# todo key przenieś do metody -1
+
+# todo popraw gen_text
+# todo key przenieś do metody -1i zamien z hex na liste
 # todo timingi dorub
 # todo timingi zrób dekoratorami ?
 # todo ogranicz wielkosc slownika do tłumaczenia

@@ -49,26 +49,6 @@ def __check_rand_drum(drum): #, debug):
 	return test
 	
 
-# todo I know what you mean :) but it's only to see if it's possible.
-# todo In any case, how to find "statement with out any effect"
-def gen_text(char_max, ran, size_double, drum_for_gen, *char_size):
-	x = []
-	if len(char_size) == 1:
-		char = char_size[0]
-		size = 1
-	else:
-		if len(char_size) == 2:
-			char = char_size[0]
-			size = char_size[1]
-		else:
-			char = 0
-			size = 1
-			
-	drum_for_gen = dict(drum_for_gen)
-	[[[x.append(randint(0, len(drum_for_gen) - 1) if ran else char) for _ in range(2 * len(drum_for_gen))]
-	  if not char_max else [x.append(len(drum_for_gen) - 1) for _ in range(2 * len(drum_for_gen))]]
-	 if size_double else [[x.append(randint(0, len(drum_for_gen) - 1) if ran else char) for _ in range(size)]
-	                      if not char_max else [x.append(len(drum_for_gen) - 1) for _ in range(size)]]]
-	return x
+
 
 	

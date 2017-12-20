@@ -1,9 +1,8 @@
+from Enigma_all.Enigma_v5.modules.__tools_single import bcolors
+from Enigma_all.Enigma_v5.modules.tools import check_text_const, check_rand_drums
+
 import decimal
 from math import log
-
-from Enigma_all.Enigma_4.modules.__tools_single import bcolors
-from Enigma_all.Enigma_4.modules.tools import check_text_const, check_rand_drums
-
 
 # todo uporadkuj nazwy
 
@@ -47,7 +46,12 @@ def test_print(drums, key_enc, key_dec, text_before, text_encrypt, text_decrypt,
 		print("Decrypt key:" + " " * 35, key_dec)
 		print("Size of drums in bit" + " " * 27, "[" + str(int(log(len(drums[0])) / log(2))) + " bit]")
 		print("Number of existing drums:" + " " * 22, "[" + str(len(drums)) + " drums]")  # number of exists drums
-		print("Number of used drums:" + " " * 26, "[" + str(len(key_enc) - 1) + " drums]")
+		# print("Number of used drums:" + " " * 26, "[" + str(len(key_enc) - 1) + " drums]")
+		for i in range(len(drums), 0, -1):
+			if len(key_dec) % i == 0:
+				print("Number of used drums:" + " " * 26, "[" + str(i) + " drums]")
+				print("Number of passes:" + " " * 30, "[" + str(len(key_dec) // i) + " passes]")
+				break
 		if check_rand_drums(drums)[0]:
 			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
 			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
@@ -60,13 +64,23 @@ def test_print(drums, key_enc, key_dec, text_before, text_encrypt, text_decrypt,
 			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + bcolors.WARNING + "[FAIL]" + bcolors.ENDC)
 			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
 			print("Minimum value in the drum:\t\t\t\t\t\t" + "[" + str(min(drums[0])) + " min]")
-		print("Number of passes:" + " " * 30, "[" + str(key_enc[0]) + " passes]")
 	
 	# Calculated variations with repetitions
-	cal_name_length = "Calculated variations with repetitions:\t\t\t"
-	cal_length = len(drums[0]) ** ((len(key_enc) - 1) * key_enc[0])
-	if show_all:
-		print(cal_name_length + "[" + format(decimal.Decimal(cal_length), '.2E') + "]")
+	for i in range(len(drums), 0, -1):
+		if len(key_dec) % i == 0:
+			cal_name_length = "Calculated variations with repetitions:\t\t\t"
+			cal_length = (len(drums[0]) ** i) ** (len(key_dec) // i)
+			if show_all:
+				print(cal_length)
+				print(cal_name_length + "[" + format(decimal.Decimal(cal_length), '.2E') + "]")
+			break
+	
+	
+	
+	# cal_name_length = "Calculated variations with repetitions:\t\t\t"
+	# cal_length = len(drums[0]) ** ((len(key_enc) - 1) * key_enc[0])
+	# if show_all:
+	# 	print(cal_name_length + "[" + format(decimal.Decimal(cal_length), '.2E') + "]")
 	
 	
 	# Pattern only if it starts at the beginning and is duplicated three times without a break
@@ -75,24 +89,24 @@ def test_print(drums, key_enc, key_dec, text_before, text_encrypt, text_decrypt,
 	check_name_length = "Checked length of the pattern:\t\t\t\t\t"
 	pattern_name = ""
 	pattern_size = 0  # todo uporadkuj nazwy
-	while test:
-		for i in range(0, len(text_encrypt)):
-			if ((2 * i + 1) + (2 * ii)) > len(text_encrypt):
-				pattern_name += "[No pattern]"
-				test = False
-				break
-			if (text_encrypt[i] == text_encrypt[i + ii]) and text_encrypt[i] == text_encrypt[(2 * i) + (2 * ii)]:
-				for x in range(0, i + ii):
-					if (text_encrypt[x] == text_encrypt[x + ii]) and text_encrypt[x] == text_encrypt[
-						(x) + (2 * ii)]:
-						if x == (i + ii - 1):
-							pattern_name += ("[" + format(decimal.Decimal(str(i + ii)), '.2E') + "]")
-							pattern_size = i + ii
-							test = False
-					else:
-						break
-			ii += 1
-			break
+	# while test:
+	# 	for i in range(0, len(text_encrypt)):
+	# 		if ((2 * i + 1) + (2 * ii)) > len(text_encrypt):
+	# 			pattern_name += "[No pattern]"
+	# 			test = False
+	# 			break
+	# 		if (text_encrypt[i] == text_encrypt[i + ii]) and text_encrypt[i] == text_encrypt[(2 * i) + (2 * ii)]:
+	# 			for x in range(0, i + ii):
+	# 				if (text_encrypt[x] == text_encrypt[x + ii]) and text_encrypt[x] == text_encrypt[
+	# 					(x) + (2 * ii)]:
+	# 					if x == (i + ii - 1):
+	# 						pattern_name += ("[" + format(decimal.Decimal(str(i + ii)), '.2E') + "]")
+	# 						pattern_size = i + ii
+	# 						test = False
+	# 				else:
+	# 					break
+	# 		ii += 1
+	# 		break
 	
 	name = "Calculated and checked pattern test:\t\t\t"
 	if len(text_encrypt) > cal_length * 3:

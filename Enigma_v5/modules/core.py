@@ -13,10 +13,12 @@ class EncryptSet:
 		self.__cycles_finished = 0
 		self.__len_key_block = 0
 		
-		for i in range(EncryptNextDrum.drum_number, 0, -1):  # todo zamiast 3 EncryptNextDrum.drum_number
+		for i in range(EncryptNextDrum.drum_number, 0, -1):
 			if len(self.__key_enc) % i == 0:
-				self.__cycles = len(self.__key_enc) // i
-				self.__len_key_block = i
+				# self.__cycles = len(self.__key_enc) // i
+				self.__cycles = i
+				# self.__len_key_block = i
+				self.__len_key_block = len(self.__key_enc) // i
 				enc = [0, ]
 				enc += self.__key_enc[0:self.__len_key_block]
 				enc.append(True)
@@ -93,8 +95,14 @@ class DecryptSet:
 		
 		for i in range(DecryptNextDrum.drum_number, 0, -1):  # todo zamiast 3 EncryptNextDrum.drum_number
 			if len(self.__key_dec) % i == 0:
-				self.__cycles = len(self.__key_dec) // i
-				self.__len_key_block = i
+				# self.__cycles = len(self.__key_dec) // i
+				# self.__len_key_block = i
+				
+				# self.__cycles = len(self.__key_enc) // i
+				self.__cycles = i
+				# self.__len_key_block = i
+				self.__len_key_block = len(self.__key_dec) // i
+				
 				dec = [0, ]
 				dec += self.__key_dec[-self.__len_key_block:]
 				dec.append(True)
@@ -130,10 +138,6 @@ class DecryptSet:
 			dec[1:self.__len_key_block + 1] = self.__key_dec[-self.__len_key_block:]
 		else:
 			dec[1:self.__len_key_block + 1] = self.__key_dec[-(self.__len_key_block * (self.__cycles_finished + 1)): -(self.__len_key_block * self.__cycles_finished )]
-			
-			
-			
-			# self.__key_dec[-1 + (- self.__len_key_block * self.__cycles_finished): (-self.__len_key_block * self.__cycles_finished) - self.__len_key_block]
 		# One cycle plus
 		self.__cycles_finished += 1
 		# If the end key, the cycle also ends
