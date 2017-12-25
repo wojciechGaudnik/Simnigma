@@ -5,6 +5,8 @@ from Enigma_all.Enigma_v5.modules.tools import save_drums, load_drums
 from Enigma_all.Enigma_v5.modules.tests_def import sdfasdf
 
 
+# todo drums ---> rotors drum ---> drum
+# todo przeszukiwanie wzorców max i min albo podział łancucha albo dzielenie przez więcej niż 2
 # todo popraw gen_text
 # todo key przenieś do metody -1i zamien z hex na liste
 # todo timingi dorub

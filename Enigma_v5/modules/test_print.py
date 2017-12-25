@@ -1,5 +1,5 @@
 from Enigma_all.Enigma_v5.modules.__tools_single import bcolors
-from Enigma_all.Enigma_v5.modules.tools import check_text_const, check_rand_drums
+from Enigma_all.Enigma_v5.modules.tools import check_text_const, check_rand_drums, create_key, check_patterns
 
 import decimal
 from math import log
@@ -16,54 +16,83 @@ def test_print(drums, key_enc, key_dec, text_before, text_encrypt, text_decrypt,
 			name_drum = str("Drum " + str(drum_number) + ":")
 			name_drum = name_drum + (17 - len(name_drum)) * " "
 			if len(name_drum + str(drum)) > 82:
-				print(name_drum + str(drum)[:82 - len("... = items  " + format(decimal.Decimal(len(drum)), '.2E') + "]")],
-				      ("... = items  " + format(decimal.Decimal(len(drum)), '.2E') + "]"))
+				print(name_drum + str(drum)[:40] + "  +...+  " + str(drum)[-34:])
 			else:
 				print(name_drum + str(drum))
 			drum_number += 1
 		
+		# Print keys
+		if len("Encrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_enc))) + "]") > 82:
+			print("Encrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_enc)))[:38].upper(),
+			      ("  +...+  " + str(" ".join(map(str ,key_enc)).upper())[-33:] + "]"))
+		else:
+			print("Encrypt key:" + " " * 4, "[" + str(" ".join(map(str ,key_enc)).upper()) + "]")
+		
+		if len("Decrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_dec))) + "]") > 82:
+			print("Decrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_dec)))[:38].upper(),
+			      ("  +...+  " + str(" ".join(map(str ,key_dec)).upper())[-33:] + "]"))
+		else:
+			print("Decrypt key:" + " " * 4, "[" + str(" ".join(map(str ,key_dec)).upper()) + "]")
+		
+		if len("Int. enc. key:" + " " * 3 + str(create_key(key_enc, drums))) > 82:
+			print("Int. enc. key:" + " " * 3 +  str(create_key(key_enc, drums))[:39],
+			       ("  +...+  " + str(create_key(key_enc, drums))[-34:]))
+		else:
+			print("Int. enc. key:" + " " * 3 + str(create_key(key_enc, drums)))
+		
+		if len("Int. dec. key:" + " " * 3 + str(create_key(key_dec, drums))) > 82:
+			print("Int. dec. key:" + " " * 3 +  str(create_key(key_dec, drums))[:39],
+			       ("  +...+  " + str(create_key(key_dec, drums))[-34:]))
+		else:
+			print("Int. enc. key:" + " " * 3 + str(create_key(key_dec, drums)))
+		
+		
 		# Print texts before, encrypt and decrypt
 		if len(str(text_before)) > 82:
-			print("Text before: \t",
-			      str(text_before)[:82 - len("... = items  " + format(decimal.Decimal(len(text_before)), '.2E') + "]")],
-			      ("... = items  " + format(decimal.Decimal(len(text_before)), '.2E') + "]"))
+			print("Text before: \t", str(text_before)[:39],("  +...+  " + str(text_before)[-34:]))
 		else:
 			print("Text before: \t", text_before)
 		if len(str(text_encrypt)) > 82:
-			print("Text encrypt: \t", str(text_encrypt)[:82 - len("... = items  " + format(decimal.Decimal(len(text_encrypt)), '.2E') + "]")],
-			      ("... = items  " + format(decimal.Decimal(len(text_encrypt)), '.2E') + "]"))
+			print("Text encrypt: \t", str(text_encrypt)[:39],("  +...+  " + str(text_encrypt)[-34:]))
 		else:
 			print("Text encrypt: \t", text_encrypt)
 		if len(str(text_decrypt)) > 82:
-			print("Text decrypt: \t", str(text_decrypt)[:82 - len("... = items  " + format(decimal.Decimal(len(text_decrypt)), '.2E') + "]")],
-			      ("... = items  " + format(decimal.Decimal(len(text_decrypt)), '.2E') + "]"))
+			print("Text decrypt: \t", str(text_decrypt)[:39],("  +...+  " + str(text_decrypt)[-34:]))
 		else:
 			print("Text decrypt: \t", text_decrypt)
 		
-		
-		print("Text length:" + " " * 35, "[" + format(decimal.Decimal(len(text_before)), '.2E') + "]")
-		print("Encrypt key:" + " " * 35, key_enc)
-		print("Decrypt key:" + " " * 35, key_dec)
-		print("Size of drums in bit" + " " * 27, "[" + str(int(log(len(drums[0])) / log(2))) + " bit]")
-		print("Number of existing drums:" + " " * 22, "[" + str(len(drums)) + " drums]")  # number of exists drums
-		# print("Number of used drums:" + " " * 26, "[" + str(len(key_enc) - 1) + " drums]")
+		# Print short drums info
+		print("Drums length:" + " " * 34, "[" + format(decimal.Decimal(len(drums[0])), '.2E') + "]")
+		print("Drums size in bit:" + " " * 29, "[" + str(int(log(len(drums[0])) / log(2))) + " bit]")
+		print("Drums, number existing:" + " " * 24, "[" + str(len(drums)) + " drums]")  # number of exists drums
 		for i in range(len(drums), 0, -1):
 			if len(key_dec) % i == 0:
-				print("Number of used drums:" + " " * 26, "[" + str(i) + " drums]")
+				print("Drums, number used:" + " " * 28, "[" + str(i) + " drums]")
 				print("Number of passes:" + " " * 30, "[" + str(len(key_dec) // i) + " passes]")
 				break
 		if check_rand_drums(drums)[0]:
-			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
-			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
 			print("Minimum value in the drum:\t\t\t\t\t\t" + "[" + str(min(drums[0])) + " min]")
+			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
+			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
 			if check_rand_drums(drums)[1]:
 				print("Randomness and integrity drum test:\t\t\t\t" + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
 			else:
 				print("Randomness and integrity drum test:\t\t\t\t" + bcolors.WARNING + bcolors.BOLD + "[FAIL]" + bcolors.ENDC)
 		else:
-			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + bcolors.WARNING + "[FAIL]" + bcolors.ENDC)
-			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
 			print("Minimum value in the drum:\t\t\t\t\t\t" + "[" + str(min(drums[0])) + " min]")
+			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
+			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + bcolors.WARNING + "[FAIL]" + bcolors.ENDC)
+		
+
+		# Print short keys info
+		
+		
+		
+		
+		
+		print("Text length:" + " " * 35, "[" + format(decimal.Decimal(len(text_before)), '.2E') + "]")
+		
+		
 	
 	# Calculated variations with repetitions
 	for i in range(len(drums), 0, -1):
@@ -88,7 +117,7 @@ def test_print(drums, key_enc, key_dec, text_before, text_encrypt, text_decrypt,
 	test = True
 	check_name_length = "Checked length of the pattern:\t\t\t\t\t"
 	pattern_name = ""
-	pattern_size = 0  # todo uporadkuj nazwy
+	pattern_size = 0 #check_patterns(text_encrypt)  # todo uporadkuj nazwy
 	# while test:
 	# 	for i in range(0, len(text_encrypt)):
 	# 		if ((2 * i + 1) + (2 * ii)) > len(text_encrypt):
