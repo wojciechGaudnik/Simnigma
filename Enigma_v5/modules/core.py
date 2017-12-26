@@ -3,17 +3,17 @@
 
 class EncryptSet:
 	
-	def __init__(self, key_enc, list_before, any_drum_for_max_i):
+	def __init__(self, key_enc, list_before, any_rotor_for_max_i):
 		self.__key_enc = key_enc
 		self.__list_before = list_before
 		self.__list_after = []
-		self.__max_i = len(any_drum_for_max_i)
+		self.__max_i = len(any_rotor_for_max_i)
 		self.__len_key = len(key_enc)
 		self.__cycles = 0
 		self.__cycles_finished = 0
 		self.__len_key_block = 0
 		
-		for i in range(EncryptNextDrum.drum_number - 1, 0, -1): # todo dodałęm - 1!!!
+		for i in range(EncryptNextRotor.rotor_number - 1, 0, -1): # todo dodałęm - 1!!!
 			if len(self.__key_enc) % i == 0:
 				self.__cycles = len(self.__key_enc) // i
 				# self.__cycles = i
@@ -28,7 +28,7 @@ class EncryptSet:
 	def set_enc_chain(self, enc):
 		if len(enc) == 1:
 			enc = self.__init__enc
-			EncryptNextDrum.drum_number = 1
+			EncryptNextRotor.rotor_number = 1
 		if self.__cycles_finished == 0:
 			# Empty chain
 			if len(self.__list_before) == 0:
@@ -61,27 +61,27 @@ class EncryptSet:
 	def get_encrypt_list(self):
 		return self.__list_after[1:]
 	
-	# def get_number_used_drums(self):
+	# def get_number_used_rotors(self):
 	# 	return len(enc)
 	
 	def get_number_passes(self):
 		return
 
 
-class EncryptNextDrum:
-	drum_number = 1
+class EncryptNextRotor:
+	rotor_number = 1
 	
-	def __init__(self, drum):
-		self.__drum = drum
-		self.__max_i = len(drum)
-		self.__drum_number = EncryptNextDrum.drum_number
-		EncryptNextDrum.drum_number += 1
+	def __init__(self, rotor):
+		self.__rotor = rotor
+		self.__max_i = len(rotor)
+		self.__rotor_number = EncryptNextRotor.rotor_number
+		EncryptNextRotor.rotor_number += 1
 	
 	def encrypt(self, char_in_int_p_key): # todo zamien na enc; char_in_in razem z enc z set_enc_chain i enc z pętli posprzątaj
 		inter_char = char_in_int_p_key
 		if char_in_int_p_key[-1]:
-			if self.__drum_number < (len(char_in_int_p_key) - 1):
-				inter_char[0] = self.__drum[char_in_int_p_key[0]] + char_in_int_p_key[self.__drum_number]
+			if self.__rotor_number < (len(char_in_int_p_key) - 1):
+				inter_char[0] = self.__rotor[char_in_int_p_key[0]] + char_in_int_p_key[self.__rotor_number]
 				if inter_char[0] >= self.__max_i:
 					inter_char[0] -= self.__max_i
 		return inter_char
@@ -89,17 +89,17 @@ class EncryptNextDrum:
 
 class DecryptSet:
 	
-	def __init__(self, key_dec, list_before, any_drum_for_max_i):
+	def __init__(self, key_dec, list_before, any_rotor_for_max_i):
 		self.__key_dec = key_dec
 		self.__list_before = list_before
 		self.__list_after = []
-		self.__max_i = len(any_drum_for_max_i)
+		self.__max_i = len(any_rotor_for_max_i)
 		self.__len_key = len(key_dec)
 		self.__cycles = 0
 		self.__cycles_finished = 0
 		self.__len_key_block = 0
 		
-		for i in range(DecryptNextDrum.drum_number - 1, 0, -1): # todo dodałęm - 1!!!
+		for i in range(DecryptNextRotor.rotor_number - 1, 0, -1): # todo dodałęm - 1!!!
 			if len(self.__key_dec) % i == 0:
 				self.__cycles = len(self.__key_dec) // i
 				# self.__len_key_block = i
@@ -118,7 +118,7 @@ class DecryptSet:
 	def set_dec_chain(self, dec):
 		if len(dec) == 1:
 			dec = self.__init__dec
-			DecryptNextDrum.drum_number = 1
+			DecryptNextRotor.rotor_number = 1
 		if self.__cycles_finished == 0:
 			# Empty chain
 			if len(self.__list_before) == 0:
@@ -155,23 +155,23 @@ class DecryptSet:
 		return self.__list_after[1:]
 
 
-class DecryptNextDrum():
-	drum_number = 1
+class DecryptNextRotor():
+	rotor_number = 1
 	
-	def __init__(self, drum):
-		self.__drum = {}
-		for key, value in drum.items():
-			self.__drum[value] = key
-		self.__max_i = len(drum)
-		self.__drum_number = DecryptNextDrum.drum_number
-		DecryptNextDrum.drum_number += 1
+	def __init__(self, rotor):
+		self.__rotor = {}
+		for key, value in rotor.items():
+			self.__rotor[value] = key
+		self.__max_i = len(rotor)
+		self.__rotor_number = DecryptNextRotor.rotor_number
+		DecryptNextRotor.rotor_number += 1
 	
 	def decrypt(self, char_in_int_p_key):
 		inter_char = char_in_int_p_key
 		if char_in_int_p_key[-1]:
-			if self.__drum_number < (len(char_in_int_p_key) - 1):
-				inter_char[0] -= char_in_int_p_key[self.__drum_number]
+			if self.__rotor_number < (len(char_in_int_p_key) - 1):
+				inter_char[0] -= char_in_int_p_key[self.__rotor_number]
 				if inter_char[0] < 0:
 					inter_char[0] += self.__max_i
-				inter_char[0] = self.__drum[inter_char[0]]
+				inter_char[0] = self.__rotor[inter_char[0]]
 		return inter_char

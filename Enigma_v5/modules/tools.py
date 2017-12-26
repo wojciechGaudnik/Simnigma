@@ -1,45 +1,45 @@
-# only functions to generate tools for ten drums encrypts
+# only functions to generate, load, save, check itp..
 from random import randint
 
 from Enigma_all.Enigma_v5.modules.__tools_single \
-	import (__cre_drum, __save_drum, __load_drum, __check_rand_drum)
-from Enigma_all.Enigma_v5.modules.core import EncryptNextDrum, EncryptSet, DecryptNextDrum, DecryptSet
+	import (__cre_rotor, __save_rotor, __load_rotor, __check_rand_rotor)
+from Enigma_all.Enigma_v5.modules.core import EncryptNextRotor, EncryptSet, DecryptNextRotor, DecryptSet
 
 
-def create_drums(size_in_bit, mix, number_of_drums):
+def create_rotors(size_in_bit, mix, number_of_rotors):
 	size = 2 ** size_in_bit
-	return ([__cre_drum(size, mix) for _ in range(0, number_of_drums)])
+	return ([__cre_rotor(size, mix) for _ in range(0, number_of_rotors)])
 	
 	
-def save_drums(drums, name):
+def save_rotors(rotors, name):
 	i = 1
-	for drum in drums:
-		__save_drum(drum, name + str(i))
+	for rotor in rotors:
+		__save_rotor(rotor, name + str(i))
 		i += 1
 		
 		
-def load_drums(name, number):
-	return ([__load_drum(x) for x in (name + str(x) for x in range(1, number + 1))])
+def load_rotors(name, number):
+	return ([__load_rotor(x) for x in (name + str(x) for x in range(1, number + 1))])
 	
 	
-def check_rand_drums(drums):
-	__key_min = min(drums[0])
-	__key_max = max(drums[0])
-	__value_min = min(drums[0].values())
-	__value_max = max(drums[0].values())
-	__len = len(drums[0])
-	__random = __check_rand_drum(drums[0])
+def check_rand_rotors(rotors):
+	__key_min = min(rotors[0])
+	__key_max = max(rotors[0])
+	__value_min = min(rotors[0].values())
+	__value_max = max(rotors[0].values())
+	__len = len(rotors[0])
+	__random = __check_rand_rotor(rotors[0])
 	
-	for drum in drums:
-		if __key_min != min(drum) or __key_max != max(drum) or __len != len(drum) or __random != __check_rand_drum(drum)\
-				or __value_min != min(drum.values()) or __value_max != max(drum.values()):
+	for rotor in rotors:
+		if __key_min != min(rotor) or __key_max != max(rotor) or __len != len(rotor) or __random != __check_rand_rotor(rotor)\
+				or __value_min != min(rotor.values()) or __value_max != max(rotor.values()):
 			return False, __random
 	return True, __random
 
 
 # todo I know what you mean :) but it's only to see if it's possible.
 # todo In any case, how to find "statement with out any effect"
-def gen_text(char_max, ran, size_triple, drum_for_gen, *char_size):
+def gen_text(char_max, ran, size_triple, rotor_for_gen, *char_size):
 	x = []
 	if len(char_size) == 1:
 		char = char_size[0]
@@ -52,11 +52,11 @@ def gen_text(char_max, ran, size_triple, drum_for_gen, *char_size):
 			char = 0
 			size = 1
 	
-	drum_for_gen = dict(drum_for_gen)
-	[[[x.append(randint(0, len(drum_for_gen) - 1) if ran else char) for _ in range(3 * len(drum_for_gen))]
-	  if not char_max else [x.append(len(drum_for_gen) - 1) for _ in range(3 * len(drum_for_gen))]]
-	 if size_triple else [[x.append(randint(0, len(drum_for_gen) - 1) if ran else char) for _ in range(size)]
-	                      if not char_max else [x.append(len(drum_for_gen) - 1) for _ in range(size)]]]
+	rotor_for_gen = dict(rotor_for_gen)
+	[[[x.append(randint(0, len(rotor_for_gen) - 1) if ran else char) for _ in range(3 * len(rotor_for_gen))]
+	  if not char_max else [x.append(len(rotor_for_gen) - 1) for _ in range(3 * len(rotor_for_gen))]]
+	 if size_triple else [[x.append(randint(0, len(rotor_for_gen) - 1) if ran else char) for _ in range(size)]
+	                      if not char_max else [x.append(len(rotor_for_gen) - 1) for _ in range(size)]]]
 	return x
 
 
@@ -67,49 +67,59 @@ def check_text_const(text_before):
 	return True
 
 
-def encrypt(drums, key_enc, text_before):
-	internal_key_enc = create_key(key_enc, drums)
-	encrypt_drums = [EncryptNextDrum(drum) for drum in drums]
-	encrypt_first = EncryptSet(internal_key_enc[:], text_before[:], drums[0])
+def encrypt(rotors, key_enc, text_before):
+	internal_key_enc = create_key(key_enc, rotors)
+	encrypt_rotors = [EncryptNextRotor(rotor) for rotor in rotors]
+	encrypt_first = EncryptSet(internal_key_enc[:], text_before[:], rotors[0])
 	
 	enc = [True]
 	while True:
 		enc = encrypt_first.set_enc_chain(enc)
-		for encrypt_drum in encrypt_drums:
-			enc = encrypt_drum.encrypt(enc)
+		for encrypt_rotor in encrypt_rotors:
+			enc = encrypt_rotor.encrypt(enc)
 		if not enc[-1]:
 			break
 	text_encrypt = encrypt_first.get_encrypt_list()
 	return text_encrypt
 
 
-def decrypt(drums, key_dec, text_encrypt):
-	internal_key_dec = create_key(key_dec, drums)
-	decrypt_drums = [DecryptNextDrum(drum) for drum in drums]
-	decrypt_first = DecryptSet(internal_key_dec[:], text_encrypt[:], drums[0])
+def decrypt(rotors, key_dec, text_encrypt):
+	internal_key_dec = create_key(key_dec, rotors)
+	decrypt_rotors = [DecryptNextRotor(rotor) for rotor in rotors]
+	decrypt_first = DecryptSet(internal_key_dec[:], text_encrypt[:], rotors[0])
 	
 	dec = [True]
 	while True:
 		dec = decrypt_first.set_dec_chain(dec)
-		for decrypt_drum in reversed(decrypt_drums):
-			dec = decrypt_drum.decrypt(dec)
+		for decrypt_rotor in reversed(decrypt_rotors):
+			dec = decrypt_rotor.decrypt(dec)
 		if not dec[-1]:
 			break
 	text_decrypt = decrypt_first.get_decrypt_list()
 	return text_decrypt
 
 
-def check_all_patterns(min_pattern, text_encrypt, mark):  #todo make optimizations
+def check_all_patterns(min_pattern, max_pattern, max_num_patterns, text_encrypt, del_patterns = [], mark = -1):  #todo make optimizations
 	t_i = text_encrypt[:]   # text internal
 	m_p = min_pattern       # min length pattern
 	p_l = []                # pattern list
-	max = len(t_i) // 2
+	max = max_pattern       #300 #len(t_i) // 2
 	min = 0
 	pf = 0
 	ps = 0
 	i_m = mark              # internal mark
 
+	if del_patterns:
+		for i in del_patterns:
+			p_len = i[0]
+			i.pop(0)
+			i.pop(0)
+			for ii in i:
+				t_i[ii: p_len + ii] = [i_m for _ in range(ii, p_len + ii)]
+
 	while True:
+		if len(p_l) >= max_num_patterns:
+			return p_l
 		# -1 in Stały ?
 		if i_m not in t_i[min + pf: max + pf]:
 			# -1 in Ruchomy ?
@@ -157,28 +167,30 @@ def check_all_patterns(min_pattern, text_encrypt, mark):  #todo make optimizatio
 				ps = 0
 
 
-def check_patterns(text_to_check): #todo https://www.tutorialspoint.com/python/string_find.htm
+def check_patterns(text_to_check, min_len = 4): #todo https://www.tutorialspoint.com/python/string_find.htm
 	list_of_patterns = []
-	a = 3
+	m = min_len
 	nr_del = 0
 	text_to_check_inter = text_to_check[:]
 	while True:
 		for i in range(0, len(text_to_check_inter)):
-			print(a)
-			if (a + i) * 3 > len(text_to_check_inter):
+			# print(a, nr_del, i, list_of_patterns)
+			if (m + i) * 3 > len(text_to_check_inter):
 				break
-			if text_to_check_inter[0: a + i] == text_to_check_inter[a + i: (a + i) * 2] == \
-					text_to_check_inter[(a + i) * 2: (a + i) * 3]:
-				list_of_patterns.append([len(text_to_check_inter[0: a + i]), nr_del, nr_del + (a + i), nr_del + (a + i) * 2])
+			if text_to_check_inter[0: m + i] == text_to_check_inter[m + i: (m + i) * 2] == \
+					text_to_check_inter[(m + i) * 2: (m + i) * 3]:
+				list_of_patterns.append([len(text_to_check_inter[0: m + i]), nr_del, nr_del + (m + i), nr_del + (m + i) * 2])
 		if len(text_to_check_inter) >= 1:
 			text_to_check_inter.pop(0)
 		else:
 			break
 		nr_del += 1
-	return list_of_patterns
+		if list_of_patterns:
+			return list_of_patterns
+	return False
 
 
-def create_key(key_my, drums):
+def create_key(key_my, rotors):
 	dic_32b = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
 	          "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
 	          "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "r": 26, "s": 27, "t": 28, "u": 29, "v": 30, "w": 31}
@@ -196,10 +208,10 @@ def create_key(key_my, drums):
 		i = 0
 		key = [0, ]
 		while number_in_32b:
-			key[i] = number_in_32b % (len(drums[0]))
-			number_in_32b //= (len(drums[0]))
+			key[i] = number_in_32b % (len(rotors[0]))
+			number_in_32b //= (len(rotors[0]))
 			i += 1
-			if number_in_32b < (len(drums[0])):
+			if number_in_32b < (len(rotors[0])):
 				key += [number_in_32b, ]
 				break
 			key += [0, ]
@@ -208,21 +220,19 @@ def create_key(key_my, drums):
 	else:
 		return key_my
 
-	# number_in_32b = 0
-	# i = 0
-	# while key_my:
-	# 	number_in_32b += dic_32b[key_my[-(1 + i)]] * (32 ** i)
-	# 	i += 1
-	# 	if len(key_my) == i:
-	# 		break
-	# i = 0
-	# key = [0,]
-	# while number_in_32b:
-	# 	key[i] = number_in_32b % (len(drums[0]))
-	# 	number_in_32b //= (len(drums[0]))
-	# 	i += 1
-	# 	if number_in_32b < (len(drums[0])):
-	# 		key += [number_in_32b, ]
-	# 		break
-	# 	key += [0, ]
-	# return key
+
+def key_in_dec(key_my):
+	dic_32b = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
+	           "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
+	           "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "r": 26, "s": 27, "t": 28, "u": 29, "v": 30, "w": 31}
+	
+	number_in_32b = 0
+	if isinstance(key_my, str):
+		key_my = key_my.lower()
+		i = 0
+		while key_my:
+			number_in_32b += dic_32b[key_my[-(1 + i)]] * (32 ** i)
+			i += 1
+			if len(key_my) == i:
+				break
+	return number_in_32b

@@ -64,12 +64,12 @@ size = 3# 2 ** bit
 # __save_drum(be6, "be6")
 # print("6s")
 
-# __check_rand_drum(be1)
-# __check_rand_drum(be2)
-# __check_rand_drum(be3)
-# __check_rand_drum(be4)
-# __check_rand_drum(be5)
-# __check_rand_drum(be6)
+# __check_rand_rotor(be1)
+# __check_rand_rotor(be2)
+# __check_rand_rotor(be3)
+# __check_rand_rotor(be4)
+# __check_rand_rotor(be5)
+# __check_rand_rotor(be6)
 
 
 
@@ -80,12 +80,12 @@ be4 = load_dict("be4")
 be5 = load_dict("be5")
 be6 = load_dict("be6")
 
-# __check_rand_drum(be1)
-# __check_rand_drum(be2)
-# __check_rand_drum(be3)
-# __check_rand_drum(be4)
-# __check_rand_drum(be5)
-# __check_rand_drum(be6)
+# __check_rand_rotor(be1)
+# __check_rand_rotor(be2)
+# __check_rand_rotor(be3)
+# __check_rand_rotor(be4)
+# __check_rand_rotor(be5)
+# __check_rand_rotor(be6)
 
 
 text_before = []
@@ -104,7 +104,7 @@ save_dict(text_before, "max_list")
 # text_before = __load_drum("max_list")
 # text_before = __load_drum("list")
 
-# __check_rand_drum(be6)
+# __check_rand_rotor(be6)
 # text_before = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 # print(len(text_before))
 

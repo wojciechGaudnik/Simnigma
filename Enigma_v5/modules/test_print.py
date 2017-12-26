@@ -1,50 +1,58 @@
 from Enigma_all.Enigma_v5.modules.__tools_single import bcolors
-from Enigma_all.Enigma_v5.modules.tools import check_text_const, check_rand_drums, create_key, check_patterns
+from Enigma_all.Enigma_v5.modules.tools import check_text_const, check_rand_rotors, create_key, check_patterns, \
+	check_all_patterns, key_in_dec
 
 import decimal
 from math import log
 
-# todo uporadkuj nazwy
 
-def test_print(drums, key_enc, key_dec, text_before, text_encrypt, text_decrypt, show_all=True):
+def test_print(rotors, key_enc, key_dec, text_before, text_encrypt, text_decrypt,
+               show_all=True, show_first=False, show_short=False, show_calc=False):
 	print("----------------------------------------------------------------------------------------------------")
 	
-	if show_all:
-		# Print drums
-		drum_number = 1
-		for drum in drums:
-			name_drum = str("Drum " + str(drum_number) + ":")
-			name_drum = name_drum + (17 - len(name_drum)) * " "
-			if len(name_drum + str(drum)) > 82:
-				print(name_drum + str(drum)[:40] + "  +...+  " + str(drum)[-34:])
+	# Checked length of the pattern
+	cal_pattern_length = 0
+	for i in range(len(rotors), 0, -1):
+		if len(create_key(key_enc, rotors)) % i == 0:
+			cal_pattern_length = (len(rotors[0]) ** i) ** (len(create_key(key_enc, rotors)) // i)
+			break
+			
+	if show_all or show_first:
+		# Print rotors
+		rotor_number = 1
+		for rotor in rotors:
+			name_rotor = str("Rotor " + str(rotor_number) + ":")
+			name_rotor = name_rotor + (17 - len(name_rotor)) * " "
+			if len(name_rotor + str(rotor)) > 82:
+				print(name_rotor + str(rotor)[:40] + "  +...+  " + str(rotor)[-34:])
 			else:
-				print(name_drum + str(drum))
-			drum_number += 1
+				print(name_rotor + str(rotor))
+			rotor_number += 1
 		
 		# Print keys
-		if len("Encrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_enc))) + "]") > 82:
-			print("Encrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_enc)))[:38].upper(),
-			      ("  +...+  " + str(" ".join(map(str ,key_enc)).upper())[-33:] + "]"))
+		if len("Encrypt key:" + " " * 5 + "[" + str(", ".join(map(str ,key_enc))) + "]") > 82:
+			print("Encrypt key:" + " " * 5 + "[" + str(", ".join(map(str ,key_enc)))[:38].upper(),
+			      ("  +...+  " + str(", ".join(map(str ,key_enc)).upper())[-33:] + "]"))
 		else:
-			print("Encrypt key:" + " " * 4, "[" + str(" ".join(map(str ,key_enc)).upper()) + "]")
+			print("Encrypt key:" + " " * 4, "[" + str(", ".join(map(str ,key_enc)).upper()) + "]")
 		
-		if len("Decrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_dec))) + "]") > 82:
-			print("Decrypt key:" + " " * 5 + "[" + str(" ".join(map(str ,key_dec)))[:38].upper(),
-			      ("  +...+  " + str(" ".join(map(str ,key_dec)).upper())[-33:] + "]"))
+		if len("Decrypt key:" + " " * 5 + "[" + str(", ".join(map(str ,key_dec))) + "]") > 82:
+			print("Decrypt key:" + " " * 5 + "[" + str(", ".join(map(str ,key_dec)))[:38].upper(),
+			      ("  +...+  " + str(", ".join(map(str ,key_dec)).upper())[-33:] + "]"))
 		else:
-			print("Decrypt key:" + " " * 4, "[" + str(" ".join(map(str ,key_dec)).upper()) + "]")
+			print("Decrypt key:" + " " * 4, "[" + str(", ".join(map(str ,key_dec)).upper()) + "]")
 		
-		if len("Int. enc. key:" + " " * 3 + str(create_key(key_enc, drums))) > 82:
-			print("Int. enc. key:" + " " * 3 +  str(create_key(key_enc, drums))[:39],
-			       ("  +...+  " + str(create_key(key_enc, drums))[-34:]))
+		if len("Int. enc. key:" + " " * 3 + str(create_key(key_enc, rotors))) > 82:
+			print("Int. enc. key:" + " " * 3 + str(create_key(key_enc, rotors))[:39],
+			      ("  +...+  " + str(create_key(key_enc, rotors))[-34:]))
 		else:
-			print("Int. enc. key:" + " " * 3 + str(create_key(key_enc, drums)))
+			print("Int. enc. key:" + " " * 3 + str(create_key(key_enc, rotors)))
 		
-		if len("Int. dec. key:" + " " * 3 + str(create_key(key_dec, drums))) > 82:
-			print("Int. dec. key:" + " " * 3 +  str(create_key(key_dec, drums))[:39],
-			       ("  +...+  " + str(create_key(key_dec, drums))[-34:]))
+		if len("Int. dec. key:" + " " * 3 + str(create_key(key_dec, rotors))) > 82:
+			print("Int. dec. key:" + " " * 3 + str(create_key(key_dec, rotors))[:39],
+			      ("  +...+  " + str(create_key(key_dec, rotors))[-34:]))
 		else:
-			print("Int. enc. key:" + " " * 3 + str(create_key(key_dec, drums)))
+			print("Int. enc. key:" + " " * 3 + str(create_key(key_dec, rotors)))
 		
 		
 		# Print texts before, encrypt and decrypt
@@ -61,101 +69,62 @@ def test_print(drums, key_enc, key_dec, text_before, text_encrypt, text_decrypt,
 		else:
 			print("Text decrypt: \t", text_decrypt)
 		
-		# Print short drums info
-		print("Drums length:" + " " * 34, "[" + format(decimal.Decimal(len(drums[0])), '.2E') + "]")
-		print("Drums size in bit:" + " " * 29, "[" + str(int(log(len(drums[0])) / log(2))) + " bit]")
-		print("Drums, number existing:" + " " * 24, "[" + str(len(drums)) + " drums]")  # number of exists drums
-		for i in range(len(drums), 0, -1):
+	if show_all or show_short:
+		# Print short rotors info
+		print("Rotors, number of key-val:" + " " * 21, "[" + format(decimal.Decimal(len(rotors[0])), '.2E') + "]")
+		print("Rotors size in bit:" + " " * 28, "[" + str(int(log(len(rotors[0])) / log(2))) + " bit]")
+		print("Rotors, number existing:" + " " * 23, "[" + str(len(rotors)) + " rotors]")  # number of exists rotors
+		for i in range(len(rotors), 0, -1):
 			if len(key_dec) % i == 0:
-				print("Drums, number used:" + " " * 28, "[" + str(i) + " drums]")
+				print("Rotors, number used:" + " " * 27, "[" + str(i) + " rotors]")
 				print("Number of passes:" + " " * 30, "[" + str(len(key_dec) // i) + " passes]")
 				break
-		if check_rand_drums(drums)[0]:
-			print("Minimum value in the drum:\t\t\t\t\t\t" + "[" + str(min(drums[0])) + " min]")
-			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
-			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
-			if check_rand_drums(drums)[1]:
-				print("Randomness and integrity drum test:\t\t\t\t" + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
+		if check_rand_rotors(rotors)[0]:
+			print("Minimum value in the rotor:\t\t\t\t\t\t" + "[" + str(min(rotors[0])) + " min]")
+			print("Maximum value in the rorot:\t\t\t\t\t\t" + "[" + str(max(rotors[0])) + " max]")
+			print("Equality test of rotors:\t\t\t\t\t\t" + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
+			if check_rand_rotors(rotors)[1]:
+				print("Randomness and integrity rotor test:\t\t\t" + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 			else:
-				print("Randomness and integrity drum test:\t\t\t\t" + bcolors.WARNING + bcolors.BOLD + "[FAIL]" + bcolors.ENDC)
+				print("Randomness and integrity rotor test:\t\t\t" + "[" + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")
 		else:
-			print("Minimum value in the drum:\t\t\t\t\t\t" + "[" + str(min(drums[0])) + " min]")
-			print("Maximum value in the drum:\t\t\t\t\t\t" + "[" + str(max(drums[0])) + " max]")
-			print("Equality test of drums:\t\t\t\t\t\t\t" + bcolors.BOLD + bcolors.WARNING + "[FAIL]" + bcolors.ENDC)
+			print("Minimum value in the rotor:\t\t\t\t\t\t" + "[" + str(min(rotors[0])) + " min]")
+			print("Maximum value in the rotor:\t\t\t\t\t\t" + "[" + str(max(rotors[0])) + " max]")
+			print("Equality test of rotors:\t\t\t\t\t\t" + "[" + bcolors.BOLD + bcolors.ORANGE + "FAIL" + bcolors.ENDC + "[")
 		
-
+		
 		# Print short keys info
+		print("Key enc. len. in num. el.:" + " " * 21, "[" + format(decimal.Decimal(len(key_enc)), '.2E') + "]")
+		print("Key int. enc. len. in num. el.:" + " " * 16, "[" + format(decimal.Decimal(len(create_key(key_enc, rotors))), '.2E') + "]")
+		if isinstance(key_enc, str): print("Key size in bit of num. in dec.:" + " " * 15, "[" + str(int(log(key_in_dec(key_enc)) / log(2) + 1)) + " bit]")
+		print("Key test the same:" + " " * 29, "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]") if key_enc == key_dec else \
+			print("Key test the same:" + " " * 29, "[" + bcolors.ORANGE + "FAIL" + bcolors.ENDC + "]")
 		
-		
-		
-		
-		
-		print("Text length:" + " " * 35, "[" + format(decimal.Decimal(len(text_before)), '.2E') + "]")
-		
-		
+			
+		# Print short text info
+		print("Text before length:" + " " * 28, "[" + format(decimal.Decimal(len(text_before)), '.2E') + "]")
+		print("Text before constant:" + " " * 26, "[{}]".format("Yes" if check_text_const(text_before) else "No"))
 	
+	if show_all or show_calc:
+		if check_text_const(text_before):
+			check_name_length = "Checked length of the pattern:\t\t\t\t\t"
+			if len(text_encrypt) > cal_pattern_length * 3:
+				patterns_over = check_patterns(text_encrypt, cal_pattern_length // 2)
+				print("Patterns over, max 3:" + " " * 26, [x for x in patterns_over[0: 3]])
+				patterns_all = check_all_patterns(4, cal_pattern_length, 3, text_encrypt, check_patterns(text_encrypt))
+				print("Patterns 3 shorter:" + " " * 28, patterns_all)
+				name = "Calculated and checked pattern test:"
+				if cal_pattern_length == patterns_over[0][0]:
+					print(name + " " * 11, "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
+				else:
+					print(name + " " * 11, "[" + bcolors.BOLD + bcolors.WARNING + "FAIL" + bcolors.ENDC + "]")
+			else:
+				print("Patterns over:" + " " * 33, "[text to short]")
+			
+			
 	# Calculated variations with repetitions
-	for i in range(len(drums), 0, -1):
-		if len(key_dec) % i == 0:
-			cal_name_length = "Calculated variations with repetitions:\t\t\t"
-			cal_length = (len(drums[0]) ** i) ** (len(key_dec) // i)
-			if show_all:
-				print(cal_length)
-				print(cal_name_length + "[" + format(decimal.Decimal(cal_length), '.2E') + "]")
-			break
-	
-	
-	
-	# cal_name_length = "Calculated variations with repetitions:\t\t\t"
-	# cal_length = len(drums[0]) ** ((len(key_enc) - 1) * key_enc[0])
-	# if show_all:
-	# 	print(cal_name_length + "[" + format(decimal.Decimal(cal_length), '.2E') + "]")
-	
-	
-	# Pattern only if it starts at the beginning and is duplicated three times without a break
-	ii = 2
-	test = True
-	check_name_length = "Checked length of the pattern:\t\t\t\t\t"
-	pattern_name = ""
-	pattern_size = 0 #check_patterns(text_encrypt)  # todo uporadkuj nazwy
-	# while test:
-	# 	for i in range(0, len(text_encrypt)):
-	# 		if ((2 * i + 1) + (2 * ii)) > len(text_encrypt):
-	# 			pattern_name += "[No pattern]"
-	# 			test = False
-	# 			break
-	# 		if (text_encrypt[i] == text_encrypt[i + ii]) and text_encrypt[i] == text_encrypt[(2 * i) + (2 * ii)]:
-	# 			for x in range(0, i + ii):
-	# 				if (text_encrypt[x] == text_encrypt[x + ii]) and text_encrypt[x] == text_encrypt[
-	# 					(x) + (2 * ii)]:
-	# 					if x == (i + ii - 1):
-	# 						pattern_name += ("[" + format(decimal.Decimal(str(i + ii)), '.2E') + "]")
-	# 						pattern_size = i + ii
-	# 						test = False
-	# 				else:
-	# 					break
-	# 		ii += 1
-	# 		break
-	
-	name = "Calculated and checked pattern test:\t\t\t"
-	if len(text_encrypt) > cal_length * 3:
-		if pattern_name == "[No pattern]":
-			if check_text_const(text_before):
-				print(check_name_length + bcolors.WARNING + bcolors.BOLD +
-				      "[" + "No pattern" + "]" + bcolors.ENDC)
-				print(name + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
-			else:
-				print(check_name_length + "[No pattern]")
-				print(name + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
-		else:
-			if show_all:
-				print(check_name_length + pattern_name)
-			if pattern_size == cal_length:
-				print(name + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
-			else:
-				print(name + bcolors.WARNING + bcolors.BOLD + "[FAIL]" + bcolors.ENDC)
-	else:
-		print(name + "[too short]")
+	cal_name_length = "Calculated variations with repetitions:\t\t\t"
+	print(cal_name_length + "[" + format(decimal.Decimal(cal_pattern_length), '.2E') + "]")
 	
 	
 	# Encrypt and decrypt tests

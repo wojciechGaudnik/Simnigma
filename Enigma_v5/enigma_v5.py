@@ -1,11 +1,12 @@
-from Enigma_all.Enigma_v5.modules.core import (EncryptFirstDrum, EncryptNextDrum,
-                                                DecryptFirstDrum, DecryptNextDrum,
-                                                )
-from Enigma_all.Enigma_v5.modules.tools import save_drums, load_drums
+from Enigma_all.Enigma_v5.modules.core import (EncryptFirstDrum, EncryptNextRotor,
+                                               DecryptFirstDrum, DecryptNextRotor,
+                                               )
+from Enigma_all.Enigma_v5.modules.tools import save_rotors, load_rotors
 from Enigma_all.Enigma_v5.modules.tests_def import sdfasdf
 
 
-# todo drums ---> rotors drum ---> drum
+
+# todo generate drum wyeliminuj dic losowe w kolejności przypadkiem zrobione
 # todo przeszukiwanie wzorców max i min albo podział łancucha albo dzielenie przez więcej niż 2
 # todo popraw gen_text
 # todo key przenieś do metody -1i zamien z hex na liste
@@ -25,6 +26,7 @@ from Enigma_all.Enigma_v5.modules.tests_def import sdfasdf
 # dorub sprwadzanie max i min słownika czy jest OK i print
 # print only 2 decimals
 # how to division with out decimal
+# drums ---> rotors drum ---> drum
 
 
 # todo ---------- this part is our playground :)----------
@@ -78,7 +80,7 @@ from Enigma_all.Enigma_v5.modules.tests_def import sdfasdf
 # # drums = drum1, drum2, drum3
 # # print(drums)
 #
-# # save_drums(drums, "./drums/set_drum_2b_")
+# # save_rotors(drums, "./drums/set_drum_2b_")
 #
 # print(drum1, drum2, drum3)
 #
@@ -92,28 +94,28 @@ from Enigma_all.Enigma_v5.modules.tests_def import sdfasdf
 #
 #
 # encrypt_first = EncryptFirstDrum(key_enc, drum1)
-# encrypt_drum1 = EncryptNextDrum(drum1)
-# encrypt_drum2 = EncryptNextDrum(drum2)
-# encrypt_drum3 = EncryptNextDrum(drum3)
-# encrypt_drum4 = EncryptNextDrum(drum3)
-# encrypt_drum5 = EncryptNextDrum(drum3)
-# encrypt_drum6 = EncryptNextDrum(drum3)
-# encrypt_drum7 = EncryptNextDrum(drum3)
-# encrypt_drum8 = EncryptNextDrum(drum3)
-# encrypt_drum9 = EncryptNextDrum(drum3)
-# encrypt_drum10 = EncryptNextDrum(drum3)
+# encrypt_drum1 = EncryptNextRotor(drum1)
+# encrypt_drum2 = EncryptNextRotor(drum2)
+# encrypt_drum3 = EncryptNextRotor(drum3)
+# encrypt_drum4 = EncryptNextRotor(drum3)
+# encrypt_drum5 = EncryptNextRotor(drum3)
+# encrypt_drum6 = EncryptNextRotor(drum3)
+# encrypt_drum7 = EncryptNextRotor(drum3)
+# encrypt_drum8 = EncryptNextRotor(drum3)
+# encrypt_drum9 = EncryptNextRotor(drum3)
+# encrypt_drum10 = EncryptNextRotor(drum3)
 #
 # decrypt_first = DecryptFirstDrum(key_dec, drum1)
-# decrypt_drum1 = DecryptNextDrum(drum1)
-# decrypt_drum2 = DecryptNextDrum(drum2)
-# decrypt_drum3 = DecryptNextDrum(drum3)
-# decrypt_drum4 = DecryptNextDrum(drum3)
-# decrypt_drum5 = DecryptNextDrum(drum3)
-# decrypt_drum6 = DecryptNextDrum(drum3)
-# decrypt_drum7 = DecryptNextDrum(drum3)
-# decrypt_drum8 = DecryptNextDrum(drum3)
-# decrypt_drum9 = DecryptNextDrum(drum3)
-# decrypt_drum10 = DecryptNextDrum(drum3)
+# decrypt_drum1 = DecryptNextRotor(drum1)
+# decrypt_drum2 = DecryptNextRotor(drum2)
+# decrypt_drum3 = DecryptNextRotor(drum3)
+# decrypt_drum4 = DecryptNextRotor(drum3)
+# decrypt_drum5 = DecryptNextRotor(drum3)
+# decrypt_drum6 = DecryptNextRotor(drum3)
+# decrypt_drum7 = DecryptNextRotor(drum3)
+# decrypt_drum8 = DecryptNextRotor(drum3)
+# decrypt_drum9 = DecryptNextRotor(drum3)
+# decrypt_drum10 = DecryptNextRotor(drum3)
 #
 # enc = []
 # while True:
