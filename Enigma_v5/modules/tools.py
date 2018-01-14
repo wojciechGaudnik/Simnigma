@@ -1,12 +1,20 @@
 # only functions to generate, load, save, check itp..
+import decimal
+import time
 from random import randint
 
-from Enigma_all.Enigma_v5.modules.__tools_single \
-	import (__cre_rotor, __save_rotor, __load_rotor, __check_rand_rotor)
-from Enigma_all.Enigma_v5.modules.core import EncryptNextRotor, EncryptSet, DecryptNextRotor, DecryptSet
+import sys
+
+from math import log
+
+from .__tools_single import __cre_rotor, __save_rotor, __load_rotor, __check_rand_rotor, generate_from_64b_inter_key
+from .core import EncryptNextRotor, EncryptSet, DecryptNextRotor, DecryptSet
 
 
-def create_rotors(size_in_bit, mix, number_of_rotors):
+
+
+
+def create_rotors(size_in_bit, mix, number_of_rotors): # todo daj mix Tru i na koncu
 	size = 2 ** size_in_bit
 	return ([__cre_rotor(size, mix) for _ in range(0, number_of_rotors)])
 	
@@ -14,14 +22,56 @@ def create_rotors(size_in_bit, mix, number_of_rotors):
 def save_rotors(rotors, name):
 	i = 1
 	for rotor in rotors:
-		__save_rotor(rotor, name + str(i))
+		__save_rotor(rotor, name + '_' + str(i))
 		i += 1
-		
+	
 		
 def load_rotors(name, number):
-	return ([__load_rotor(x) for x in (name + str(x) for x in range(1, number + 1))])
+	return ([__load_rotor(x) for x in (name + '_' + str(x) for x in range(1, number + 1))])
+
+
+def save_key(name, key):
+	name += ".key" if ".key" not in name[-4:] else ""
+	f = open(name, "wb")
+	try:
+		f.write(bytes(key + "\n", 'ascii'))
+	finally:
+		f.close()
+
+
+def load_key(name):
+	name += ".key" if ".key" not in name[-4:] else ""
+	f = open(name, "rb")
+	try:
+		key_list = f.read()
+	finally:
+		f.close()
+	key = ""
+	key_ret = ""
+	for c in key_list:
+		key += chr(c)
+	key_ret = key_ret.join(key)
+	return key_ret[:-1]
 	
 	
+def save_file(name, file):
+	f = open(name, "wb")
+	file.append(10)
+	try:
+		f.write(bytes(file))
+	finally:
+		f.close()
+	
+	
+def load_file(name):
+	f = open(name, "rb")
+	try:
+		file = f.read()
+	finally:
+		f.close()
+	file = list(file)
+	return file[:-1]
+
 def check_rand_rotors(rotors):
 	__key_min = min(rotors[0])
 	__key_max = max(rotors[0])
@@ -40,6 +90,7 @@ def check_rand_rotors(rotors):
 # todo I know what you mean :) but it's only to see if it's possible.
 # todo In any case, how to find "statement with out any effect"
 def gen_text(char_max, ran, size_triple, rotor_for_gen, *char_size):
+	print("Dorób proces postępu gen_text ")
 	x = []
 	if len(char_size) == 1:
 		char = char_size[0]
@@ -68,9 +119,9 @@ def check_text_const(text_before):
 
 
 def encrypt(rotors, key_enc, text_before):
-	internal_key_enc = create_key(key_enc, rotors)
+	# internal_key_enc = __generate_inter_key(key_enc, rotors)
 	encrypt_rotors = [EncryptNextRotor(rotor) for rotor in rotors]
-	encrypt_first = EncryptSet(internal_key_enc[:], text_before[:], rotors[0])
+	encrypt_first = EncryptSet(key_enc[:], text_before[:], rotors)
 	
 	enc = [True]
 	while True:
@@ -84,9 +135,9 @@ def encrypt(rotors, key_enc, text_before):
 
 
 def decrypt(rotors, key_dec, text_encrypt):
-	internal_key_dec = create_key(key_dec, rotors)
+	# internal_key_dec = __generate_inter_key(key_dec, rotors)
 	decrypt_rotors = [DecryptNextRotor(rotor) for rotor in rotors]
-	decrypt_first = DecryptSet(internal_key_dec[:], text_encrypt[:], rotors[0])
+	decrypt_first = DecryptSet(key_dec[:], text_encrypt[:], rotors)
 	
 	dec = [True]
 	while True:
@@ -99,16 +150,19 @@ def decrypt(rotors, key_dec, text_encrypt):
 	return text_decrypt
 
 
-def check_all_patterns(min_pattern, max_pattern, max_num_patterns, text_encrypt, del_patterns = [], mark = -1):  #todo make optimizations
-	t_i = text_encrypt[:]   # text internal
-	m_p = min_pattern       # min length pattern
-	p_l = []                # pattern list
-	max = max_pattern       #300 #len(t_i) // 2
+def check_all_patterns(text_encrypt, min_pattern, max_pattern, max_num_patterns=1, number_of_check_patterns=0,
+                       del_patterns=[], show=False,
+                       mark=-1):  # todo make optimizations, chyba przelatuje zakres jak sprawdzalem DNA !!!
+	t_i = text_encrypt[:]  # text internal
+	min_p = min_pattern  # min length pattern
+	max_p = max_pattern  # 300 #len(t_i) // 2
+	stop_if = max_pattern
+	p_l = []  # pattern list
 	min = 0
 	pf = 0
 	ps = 0
-	i_m = mark              # internal mark
-
+	i_m = mark  # internal mark
+	
 	if del_patterns:
 		for i in del_patterns:
 			p_len = i[0]
@@ -116,30 +170,60 @@ def check_all_patterns(min_pattern, max_pattern, max_num_patterns, text_encrypt,
 			i.pop(0)
 			for ii in i:
 				t_i[ii: p_len + ii] = [i_m for _ in range(ii, p_len + ii)]
-
+	
 	while True:
+		if number_of_check_patterns != 0:
+			if stop_if - max_p >= number_of_check_patterns:
+				print(("\rPatterns shorter, only {} first:".format(max_num_patterns) + " " * 20)[:49] + str(
+					[p_l if p_l else "[None]"])[2:-2]) if show else None
+				sys.stdout.write("\r")
+				return p_l
+		# sys.stdout.write(str((str("\rPatterns 3 shorter in progres ..." + " " * 15,),
+		#                  str(([patt for patt in p_l])[1:])[:-1], str((len(t_i[min + pf: max_p + pf]), min + pf, max_p + pf + ps)))))
+		
+		# sys.stdout.write(("\rPatterns 3 shorter in progres ..." + " " * 15 + str((len(t_i[min + pf: max_p + pf]), min + pf, max_p + pf + ps))))
+		# time.sleep(0.1)
+		sys.stdout.write(("\rPatterns shorter, only {} first in progress ...".format(max_num_patterns) + " " * 7)[:49] +
+		                 str(p_l)[1:-1] + str([', ' if p_l else ""])[2:-2] + str(
+			list([len(t_i[min + pf: max_p + pf]), min + pf, max_p + pf + ps]))) \
+			if show else None
+		# sys.stdout.write(("\r" + "Patterns over, only {} first in progress ...".format(num_of_pat) + " " * 7)[:49])
+		# sys.stdout.write(("\r" + "Patterns over, only first in progres ..." + " " * 8 + str(list_of_patterns)[1:-1] +
+		#                   str([len(text_to_check_inter[0: m + i]), nr_del, nr_del + (m + i),
+		#                        nr_del + (m + i) * 2])))  # [0:82])
+		
+		# print(str(([patt for patt in p_l])[1:])[:-1], "\b", len(t_i[min + pf: max_p + pf]), min + pf, max_p + pf + ps)
 		if len(p_l) >= max_num_patterns:
+			print(("\rPatterns shorter, only {} first:".format(max_num_patterns) + " " * 20)[:49] + str(
+				[p_l if p_l else "[None]"])[1:-1]) if show else None
+			sys.stdout.write("\r")
 			return p_l
 		# -1 in Stały ?
-		if i_m not in t_i[min + pf: max + pf]:
+		if i_m not in t_i[min + pf: max_p + pf]:
 			# -1 in Ruchomy ?
-			if i_m not in t_i[max + pf + ps: 2*max + pf + ps]:
+			if i_m not in t_i[max_p + pf + ps: 2 * max_p + pf + ps]:
 				# Stały == Ruchomy ?
-				if t_i[min + pf: max + pf] == t_i[max + pf + ps: 2*max + pf + ps]:
+				if t_i[min + pf: max_p + pf] == t_i[max_p + pf + ps: 2 * max_p + pf + ps]:
 					# Save and zamień na -1
-					p_l.append([len(t_i[min + pf: max + pf]), min + pf, max + pf + ps])
-					t_i[max + pf + ps: 2*max + pf + ps] = [i_m for _ in range(max + pf + ps, 2*max + pf + ps)]
+					p_l.append([len(t_i[min + pf: max_p + pf]), min + pf, max_p + pf + ps])
+					t_i[max_p + pf + ps: 2 * max_p + pf + ps] = [i_m for _ in
+					                                             range(max_p + pf + ps, 2 * max_p + pf + ps)]
 			# Ruchomy END ?
-			if t_i[max + pf + ps: 2*max + pf + ps] == t_i[-len(t_i[max + pf + ps: 2*max + pf + ps]):]:
+			if t_i[max_p + pf + ps: 2 * max_p + pf + ps] == t_i[-len(t_i[max_p + pf + ps: 2 * max_p + pf + ps]):]:
 				# Stały END ?
-				if t_i[min + pf: max + pf] + t_i[max + pf + ps: 2*max + pf + ps] == t_i[-2*len(t_i[max + pf + ps: 2*max + pf + ps]):]:
+				if t_i[min + pf: max_p + pf] + t_i[max_p + pf + ps: 2 * max_p + pf + ps] == t_i[-2 * len(
+						t_i[max_p + pf + ps: 2 * max_p + pf + ps]):]:
 					# Len min ?
-					if len(t_i[min + pf: max + pf]) == m_p:
+					if len(t_i[min + pf: max_p + pf]) < min_p:
 						# STOP
+						print(
+							("\rPatterns shorter, only {} first:".format(max_num_patterns) + " " * 20)[:49] + str(p_l)[
+							                                                                                  1:-1]) if show else None
+						sys.stdout.write("\r")
 						return p_l
 					# Stały -1, Ruchomy - 1, Stały << p, Ruchomy << p
 					else:
-						max -= 1
+						max_p -= 1
 						pf = 0
 						ps = 0
 				# stały >> 1, Ruch << p
@@ -150,15 +234,18 @@ def check_all_patterns(min_pattern, max_pattern, max_num_patterns, text_encrypt,
 			else:
 				ps += 1
 		else:
-			if t_i[min + pf: max + pf] + t_i[max + pf + ps: 2 * max + pf + ps] == t_i[-2 * len(
-					t_i[max + pf + ps: 2 * max + pf + ps]):]:
+			if t_i[min + pf: max_p + pf] + t_i[max_p + pf + ps: 2 * max_p + pf + ps] == t_i[-2 * len(
+					t_i[max_p + pf + ps: 2 * max_p + pf + ps]):]:
 				# Len min ?
-				if len(t_i[min + pf: max + pf]) == m_p:
+				if len(t_i[min + pf: max_p + pf]) < min_p:
 					# STOP
+					print(("\rPatterns shorter, only {} first:".format(max_num_patterns) + " " * 20)[:49] +
+					      str(p_l)[1:-1]) if show else None
+					sys.stdout.write("\r")
 					return p_l
 				# Stały -1, Ruchomy - 1, Stały << p, Ruchomy << p
 				else:
-					max -= 1
+					max_p -= 1
 					pf = 0
 					ps = 0
 			# stały >> 1, Ruch << p
@@ -167,41 +254,67 @@ def check_all_patterns(min_pattern, max_pattern, max_num_patterns, text_encrypt,
 				ps = 0
 
 
-def check_patterns(text_to_check, min_len = 4): #todo https://www.tutorialspoint.com/python/string_find.htm
-	list_of_patterns = []
+def check_patterns(text_to_check, min_len = 4, max_num_patterns = 1, show = False): #todo https://www.tutorialspoint.com/python/string_find.htm
+	p_l = []        # pattern list
 	m = min_len
 	nr_del = 0
 	text_to_check_inter = text_to_check[:]
 	while True:
 		for i in range(0, len(text_to_check_inter)):
-			# print(a, nr_del, i, list_of_patterns)
+			# print("test")
+			if show:
+				# time.sleep(0.01)
+				sys.stdout.write((("\rPatterns over, only {} first in progress ...".format(max_num_patterns) + " " * 7)[:49] + str(p_l)[1:-1] + str([', ' if p_l else ""])[2:-2] +
+				                  str([len(text_to_check_inter[0: m + i]), nr_del, nr_del + (m + i), nr_del + (m + i) * 2])))# + ", "))#[0:82])
+			# time.sleep(0.001)
+			# if len(p_l) <= num_of_pat:
+			# 	if p_l:
+			# 		# len_patt = len(p_l)
+			# 		sys.stdout.write("\rProgress :\t\t\t\t\t\t\t\t %s " % [i for i in p_l])
+					# sys.stdout.flush()
+			# print(p_l)
+			# print("\rProgress decrypt:\t\t\t\t\t\t\t\t[100 %]")
+			# else:
+			# 	# sys.stdout.write("\rProgress decrypt:\t\t\t\t\t\t\t\t[%.4f %%]    " % (progress))
+			
+			
 			if (m + i) * 3 > len(text_to_check_inter):
 				break
 			if text_to_check_inter[0: m + i] == text_to_check_inter[m + i: (m + i) * 2] == \
 					text_to_check_inter[(m + i) * 2: (m + i) * 3]:
-				list_of_patterns.append([len(text_to_check_inter[0: m + i]), nr_del, nr_del + (m + i), nr_del + (m + i) * 2])
+				p_l.append([len(text_to_check_inter[0: m + i]), nr_del, nr_del + (m + i), nr_del + (m + i) * 2])
+				if len(p_l) == max_num_patterns:
+					if show:
+						print(str("\rPatterns over, first {}:".format(max_num_patterns) + " " * 30)[:49] + str(p_l)[1:-1])
+					return p_l
 		if len(text_to_check_inter) >= 1:
 			text_to_check_inter.pop(0)
+			nr_del += 1
 		else:
 			break
-		nr_del += 1
-		if list_of_patterns:
-			return list_of_patterns
+		if p_l:
+			if show:
+				print(str("\rPatterns over, first {}:".format(max_num_patterns) + " " * 30)[:49] + (str(p_l))[1:-1])
+			return p_l
+	sys.stdout.write("\r")
 	return False
 
-
+# todo do usunięcia ?!?!?
 def create_key(key_my, rotors):
-	dic_32b = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
-	          "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
-	          "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "r": 26, "s": 27, "t": 28, "u": 29, "v": 30, "w": 31}
-	
+	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
+	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
+	             "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "q": 26, "r": 27, "s": 28, "t": 29, "u": 30,
+	             "v": 31, "w": 32, "x": 33, "y": 34, "z": 35, "A": 36, "B": 37, "C": 38, "D": 39, "E": 40,
+	             "F": 41, "G": 42, "H": 43, "I": 44, "J": 45, "K": 46, "L": 47, "M": 48, "N": 49, "O": 50,
+	             "P": 51, "Q": 52, "R": 53, "S": 54, "T": 55, "U": 56, "V": 57, "W": 58, "X": 59, "Y": 60,
+	             "Z": 61, "+": 62, "/": 63}
 	
 	if isinstance(key_my, str):
 		key_my = key_my.lower()
 		number_in_32b = 0
 		i = 0
 		while key_my:
-			number_in_32b += dic_32b[key_my[-(1 + i)]] * (32 ** i)
+			number_in_32b += dic_64b_1[key_my[-(1 + i)]] * (32 ** i)
 			i += 1
 			if len(key_my) == i:
 				break
@@ -220,12 +333,12 @@ def create_key(key_my, rotors):
 	else:
 		return key_my
 
-
-def key_in_dec(key_my):
+# change key if 64b to DEC
+def key_from_64b_to_dec(key_my):
 	dic_32b = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
 	           "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
 	           "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "r": 26, "s": 27, "t": 28, "u": 29, "v": 30, "w": 31}
-	
+
 	number_in_32b = 0
 	if isinstance(key_my, str):
 		key_my = key_my.lower()
@@ -236,3 +349,227 @@ def key_in_dec(key_my):
 			if len(key_my) == i:
 				break
 	return number_in_32b
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def __generate_inter_key(key, rotors, show=False):
+# 	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
+# 	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
+# 	             "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "q": 26, "r": 27, "s": 28, "t": 29, "u": 30,
+# 	             "v": 31, "w": 32, "x": 33, "y": 34, "z": 35, "A": 36, "B": 37, "C": 38, "D": 39, "E": 40,
+# 	             "F": 41, "G": 42, "H": 43, "I": 44, "J": 45, "K": 46, "L": 47, "M": 48, "N": 49, "O": 50,
+# 	             "P": 51, "Q": 52, "R": 53, "S": 54, "T": 55, "U": 56, "V": 57, "W": 58, "X": 59, "Y": 60,
+# 	             "Z": 61, "+": 62, "/": 63}
+#
+# 	# 64b transformed to DEC
+# 	rand_num_in_DEC_from_64b = 0
+# 	exponent = 0
+# 	num_in_64b = key[:]
+# 	for i in num_in_64b:
+# 		rand_num_in_DEC_from_64b += (dic_64b_1[i] * (64 ** exponent))
+# 		exponent += 1
+# 	if show:
+# 		print("Random number in DEC from 64b: ")
+# 		for i in range(0, len(str(rand_num_in_DEC_from_64b)) + 60, 60):
+# 			if str(rand_num_in_DEC_from_64b)[i: 60 + i]:
+# 				print(str(rand_num_in_DEC_from_64b)[i: 60 + i])
+# 			else:
+# 				# print("")
+# 				break
+# 	# print(str(rand_num_in_DEC_from_64b)[i: 60 + i])
+# 	# rand_num_in_DEC_from_64b_save = rand_num_in_DEC_from_64b
+#
+# 	# Generate internal key from DEC
+# 	i = 0
+# 	inter_key = [0, ]
+# 	while rand_num_in_DEC_from_64b:
+# 		inter_key[i] = rand_num_in_DEC_from_64b % (len(rotors[0]))
+# 		rand_num_in_DEC_from_64b //= (len(rotors[0]))
+# 		i += 1
+# 		if rand_num_in_DEC_from_64b < (len(rotors[0])):
+# 			inter_key += [rand_num_in_DEC_from_64b, ]
+# 			break
+# 		inter_key += [0]
+# 	# inter_key = inter_key[::-1]   # the number in the correct order, without this number, is invert
+# 	if len(inter_key) % len(rotors) != 0:
+# 		add_zeros = abs((len(inter_key) % len(rotors)) - len(rotors))
+# 		for _ in range(0, add_zeros):
+# 			inter_key.insert(0, 0)
+#
+# 	if show:
+# 		print("\nInternal key: ")
+# 		for i in range(0, len(str(inter_key)) + 60, 60):
+# 			if str(inter_key)[i: 60 + i]:
+# 				print(str(inter_key)[i: 60 + i])
+# 			else:
+# 				# print("")
+# 				break
+# 		print(str(inter_key)[i: 60 + i])
+# 		if (len(inter_key) % len(rotors) != 0):
+# 			print("\nFail")
+# 			return False
+# 		else:
+# 			print("\nPass")
+# 	return inter_key
+
+
+#
+def create_random_64b_key(size_in_bit = 2, rotors = [], show = False): #todo usuń rotors !!!
+	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
+	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
+	             "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "q": 26, "r": 27, "s": 28, "t": 29, "u": 30,
+	             "v": 31, "w": 32, "x": 33, "y": 34, "z": 35, "A": 36, "B": 37, "C": 38, "D": 39, "E": 40,
+	             "F": 41, "G": 42, "H": 43, "I": 44, "J": 45, "K": 46, "L": 47, "M": 48, "N": 49, "O": 50,
+	             "P": 51, "Q": 52, "R": 53, "S": 54, "T": 55, "U": 56, "V": 57, "W": 58, "X": 59, "Y": 60,
+	             "Z": 61, "+": 62, "/": 63}
+	
+	dic_64b_2 = {}
+	for inter_key, value in dic_64b_1.items():
+		dic_64b_2[value] = inter_key
+	
+	# Random number in DEC
+	rand_num_in_DEC = randint(2 ** size_in_bit, (2 ** (size_in_bit + 1)) - 1)
+	if show:
+		print("Size of the number in bit: ", int(log(rand_num_in_DEC, 2)))
+		print("Random number in DEC: ")
+		for i in range(0, len(str(rand_num_in_DEC)) + 60, 60):
+			if str(rand_num_in_DEC)[i: 60 + i]:
+				print(str(rand_num_in_DEC)[i: 60 + i])
+			else:
+				print("")
+				break
+	rand_num_in_DEC_save = rand_num_in_DEC
+	
+	# DEC transformed to 64b
+	rand_num_in_64b = ""
+	while rand_num_in_DEC:
+		mod = rand_num_in_DEC % 64
+		one_64b = dic_64b_2[mod]
+		rand_num_in_64b += one_64b
+		rand_num_in_DEC //= 64
+	if show:
+		print("Random number in 64b: ")
+		for i in range(0, len(str(rand_num_in_64b)) + 60, 60):
+			if str(rand_num_in_64b)[i: 60 + i]:
+				print(str(rand_num_in_64b)[i: 60 + i])
+			else:
+				print("")
+				break
+	
+	# return __generate_inter_key(rand_num_in_64b, rotors)
+	return str(rand_num_in_64b)  # todo usuń rotors
+	# # 64b transformed to DEC
+	# rand_num_in_DEC_from_64b = 0
+	# exponent = 0
+	# for i in rand_num_in_64b:
+	# 	rand_num_in_DEC_from_64b += (dic_64b_1[i] * (64 ** exponent))
+	# 	exponent += 1
+	# if show:
+	# 	print("Random number in DEC from 64b: ")
+	# 	for i in range(0, len(str(rand_num_in_DEC_from_64b)) + 60, 60):
+	# 		if str(rand_num_in_DEC_from_64b)[i: 60 + i]:
+	# 			print(str(rand_num_in_DEC_from_64b)[i: 60 + i])
+	# 		else:
+	# 			# print("")
+	# 			break
+	# 		# print(str(rand_num_in_DEC_from_64b)[i: 60 + i])
+	# rand_num_in_DEC_from_64b_save = rand_num_in_DEC_from_64b
+	#
+	# # Generate internal key from DEC
+	# i = 0
+	# inter_key = [0, ]
+	# while rand_num_in_DEC_from_64b:
+	# 	inter_key[i] = rand_num_in_DEC_from_64b % (len(rotors[0]))
+	# 	rand_num_in_DEC_from_64b //= (len(rotors[0]))
+	# 	i += 1
+	# 	if rand_num_in_DEC_from_64b < (len(rotors[0])):
+	# 		inter_key += [rand_num_in_DEC_from_64b, ]
+	# 		break
+	# 	inter_key += [0]
+	# # inter_key = inter_key[::-1]   # the number in the correct order, without this number, is invert
+	# if len(inter_key) % len(rotors) != 0:
+	# 	add_zeros = abs((len(inter_key) % len(rotors)) - len(rotors))
+	# 	for _ in range(0, add_zeros):
+	# 		inter_key.insert(0,0)
+	#
+	# if show:
+	# 	print("\nInternal key: ")
+	# 	for i in range(0, len(str(inter_key)) + 60, 60):
+	# 		if str(inter_key)[i: 60 + i]:
+	# 			print(str(inter_key)[i: 60 + i])
+	# 		else:
+	# 			# print("")
+	# 			break
+	# 		# print(str(inter_key)[i: 60 + i])
+	# 	if (rand_num_in_DEC_save != rand_num_in_DEC_from_64b_save) or (len(inter_key) % len(rotors) != 0):
+	# 		print("\nFail\n")
+	# 		return False
+	# 	else:
+	# 		print("\nPass\n")
+	# return inter_key, rand_num_in_64b
+	
+def calc_number_comb(rotors, key):
+	if isinstance(key, str):
+		for i in range(len(rotors), 0, -1):
+			if len(generate_from_64b_inter_key(key, rotors)) % i == 0:
+				cal_pattern_length = (len(rotors[0]) ** i) ** (len(generate_from_64b_inter_key(key, rotors)) // i)
+				return cal_pattern_length
+	else:
+		for i in range(len(rotors), 0, -1):
+				cal_pattern_length = (len(rotors[0]) ** i) ** (len(key) // i)
+				return 	cal_pattern_length
+		# return key
+		# cal_pattern_length = (len(rotors[0]) ** len(rotors))
+		# return cal_pattern_length
+		
+def print_long(name, objects, min, max, show_all = False):
+	order_number = 1
+	space = min - len(name)
+	if not(len(objects) > 1 and (isinstance(objects[1], dict) or isinstance(objects[1], list))):
+		objects = str(objects)
+	if not isinstance(objects, str):
+		for obj in objects:
+			name_int = str(name + " " + str(order_number) + ":" + (" " * (space - len(str(order_number)))))
+			if (len(name_int + str(obj)) > max) and not show_all:
+				name_int2 = name_int + str(obj)[0:((max - len(name_int)) // 2) - 6] + "  +...+  "
+				print(name_int2 + str(obj)[-(max - len(name_int2)):])
+			else:
+				if (len(name_int + str(obj)) > max) and show_all:
+					obj_str = str(obj)
+					print(name_int + obj_str[0:max - len(name_int)])
+					for i in range(max - len(name_int), len(obj_str), max - len(name_int) ):
+						print(" " * len(name_int) + obj_str[i: i + max - len(name_int)])
+				else:
+					print(name_int + str(obj))
+			order_number += 1
+	else:
+		if isinstance(objects, str):
+			obj = objects
+			name_int = str(name + ":" + (" " * (space + len(str(order_number)))))
+			if (len(name_int + str(obj)) > max) and not show_all:
+				# a = 0
+				# print(max, space, len(name_int))
+				# if (max - space) % 2 == 0:
+				# 	a = 1
+				# # else:
+				# # 	a = 9
+				name_int2 = name_int + str(obj)[0:((max - len(name_int)) // 2) - 6] + "  +...+  "
+				print(name_int2 + str(obj)[-(max - len(name_int2)):])
+			else:
+				if (len(name_int + str(obj)) > max) and show_all:
+					obj_str = str(obj)
+					print(name_int + obj_str[0:max - len(name_int)])
+					for i in range(max - len(name_int), len(obj_str), max - len(name_int)):
+						print(" " * len(name_int) + obj_str[i: i + max - len(name_int)])
+				else:
+					print(name_int + obj)
