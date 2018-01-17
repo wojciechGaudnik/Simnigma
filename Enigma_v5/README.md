@@ -22,14 +22,18 @@ Usage:      enigma5 -c [file of files, you can use reg.]
             enigma5 -d [file] -k [file] -r [first rotor file, or name in dictionary rotors]
                 Decryption with the indicated key and indicated rotors and their number
             
-            enigma5 -R [name], [number]     Create rotors, name only common part, number of created rotors
             enigma5 -K [name], [size]       Create key, size in bits
+            enigma5 -R [name], [number]     Create rotors, name only common part, number of created rotors
             
             enigma5 -v --verbose            Show all progress
-            # todo enigma5 -t --tests              Run tests encrypt and decrypt
+            enigma5 -s --silent             If you wont to encrypt text directly from keybord or if you decript txt file, 
+                                            use this option if you wont only read mesages without save files
+            
             enigma5 -h --help               Display this help and exit
             enigma5 -V --version            Output version information and exit
-   
+            # todo enigma5 -t --tests              Run tests encrypt and decrypt
+            # todo enigma5 -rsa             Lock and anlock with rsa keys
+            
 Examples:   enigma5.py -K your_key_name 2048 
                 First you need to create a random key, 2048 it is size in bit 
             enigma5.py -R your_rotors_name 20 
@@ -44,6 +48,27 @@ Examples:   enigma5.py -K your_key_name 2048
                 And last you can decrypt file or files, remember that you must use the same rotors and keys as
                  you use to encrypt, what is logically
 			
+
+-c sadf
+-d asdf
+-c sdaf -k asdf
+-d asdf -k asdf
+-c asdf -k asdf -r sadf
+-d asdf -k asdf -r asdf
+....... -v
+....... -s
+....... -v -s
+
+-K sadf 1234
+-R asdf 12
+-K asdf 1234 -R asdf 12
+....... -v
+
+-h --help
+-V --version
+
+
+
 
 Mandatory arguments to long options are mandatory for short options too.
   -a, --all                  do not ignore entries starting with .

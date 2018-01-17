@@ -570,7 +570,8 @@ def convert_str_to_list(text_before):
 	return text_in_list
 
 
-def show_help():
+def show_help(place):
+	print(place)
 	print("""
 Simple programme for encrypts and decrypts files.
 Usage:      enigma5 -c [file of files, you can use reg.]
@@ -609,3 +610,4 @@ Examples:   enigma5.py -K your_key_name 2048
                 And last you can decrypt file or files, remember that you must use the same rotors and keys as
                  you use to encrypt, what is logically
 	""")
+	exit()

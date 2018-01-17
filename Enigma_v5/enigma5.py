@@ -50,24 +50,73 @@ from modules.test_print import test_print
 
 version = '5.0.0'
 options = sys.argv
+options += [' ',]
 options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version')
 max_print_length = 110
 min_print_length = 15
 
 options_current = list(filter(lambda opt: opt in options_all , options))
-for opt in options_current:
-	if options_current.count(opt) > 1:
-		show_help()
-		print('---- początek')
-		exit()
 options_param = list(filter(lambda opt: opt not in options_all, options))
 options_param = options_param[1:]
+# options_param.append(' ')
 
+print(options)
+for opt in options:
+	if opt[0] == '-' and opt not in options_all:
+		show_help('opcje których nie ma w all')
 
 show = False
 if (('-v') or ('--verbose')) in options_current:
 	show = True
 	options_current.remove('-v') if ('-v') in options_current else options_current.remove('--verbose')
+
+only_screen = False
+if ('-s' or '--silent') in options_current:
+	only_screen = True
+	options_current.remove('-s') if ('-s') in options_current else options_current.remove('--silent')
+
+
+print('options_current:', options_current)
+print('options_param:', options_param)
+print('options:', options)
+while len(options_current) <= 3:
+	if '-c' in options_current and len(options_current) == 1:
+		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-': break
+	if '-d' in options_current and len(options_current) == 1:
+		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-': break
+	
+	if (all(opt in options_current for opt in ['-c', '-k'])) and len(options_current) == 2:
+		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-':
+			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ': break
+	if (all(opt in options_current for opt in ['-d', '-k'])) and len(options_current) == 2:
+		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-':
+			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ': break
+
+	if (all(opt in options_current for opt in ['-c', '-k', '-r'])) and len(options_current) == 3:
+		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-':
+			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ':
+					if options[options.index('-r') + 1] != ' ' and options[options.index('-r') + 1][0] != '-':
+						if (options[options.index('-r') + 2] in options_all) or options[options.index('-r') + 2] == ' ': break
+	if (all(opt in options_current for opt in ['-d', '-k', '-r'])) and len(options_current) == 3:
+		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-':
+			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ':
+					if options[options.index('-r') + 1] != ' ' and options[options.index('-r') + 1][0] != '-':
+						if (options[options.index('-r') + 2] in options_all) or options[options.index('-r') + 2] == ' ': break
+					
+		
+	if '-K' in options_current and len(options_current) == 1: break
+	if '-R' in options_current and len(options_current) == 1: break
+	if (all(opt in options_current for opt in ['-K', '-R'])) and len(options_current) == 2:	break
+	if ('-h' or '--help') in options_current and len(options_current) == 1: break
+	if ('-V' or '--Version') in options_current and len(options_current) == 1: break
+	show_help("Na koncu while")
+else:
+	show_help('Else z while')
+
 
 if ('-c' in options_current) or ('-d' in options_current):
 	
@@ -157,6 +206,8 @@ if ('-c' in options_current) or ('-d' in options_current):
 	if name_of_rotors_in_dir: print('Loaded rotors:', name_of_rotors_in_dir)
 	if last_rotors_in_dir: print('Loaded rotors:', last_rotors_in_dir)
 
+	exit('klucz i rotorsy loaded')
+	
 	
 	files_to_crypt = []
 	number_of_files = 0
@@ -212,9 +263,8 @@ elif ('-R' in options_current) or ('-K' in options_current):
 		options_current.remove('-K')
 		options_param.remove(options[options.index('-K') + 1])
 		options_param.remove(options[options.index('-K') + 2])
-		if options_current:
-			show_help()
-			print('----217')
+		# if options_current:
+		# 	show_help('----217')
 		key = create_random_64b_key(int(key_size))
 		save_key(name_of_key, key)
 		print('Key created:    ', name_of_key + '.key')
@@ -225,9 +275,9 @@ elif ('-R' in options_current) or ('-K' in options_current):
 		options_param.remove(name_of_rotors_in_dir)
 		number_of_rotors = int(options[options.index('-R') + 2])
 		options_param.remove(str(number_of_rotors))
-		if options_current:
-			show_help()
-			print('----230')
+		# if options_current:
+		# 	show_help()
+		# 	print('----230')
 		rotors = create_rotors(8, True, number_of_rotors)
 		name_of_rotors_in_dir = options[0][:options[0].rfind('/')] + '/rotors/' + name_of_rotors_in_dir
 		save_rotors(rotors, name_of_rotors_in_dir)
