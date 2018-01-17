@@ -108,9 +108,23 @@ while len(options_current) <= 3:
 						if (options[options.index('-r') + 2] in options_all) or options[options.index('-r') + 2] == ' ': break
 					
 		
-	if '-K' in options_current and len(options_current) == 1: break
-	if '-R' in options_current and len(options_current) == 1: break
-	if (all(opt in options_current for opt in ['-K', '-R'])) and len(options_current) == 2:	break
+	if ('-K' in options_current and len(options_current) == 1) or ('-R' in options_current and len(options_current) == 1) or \
+			((all(opt in options_current for opt in ['-K', '-R'])) and len(options_current) == 2):
+		if '-K' in options_current and options[options.index('-K') + 1] != ' ' and options[options.index('-K') + 1][0] != '-':
+			try:
+				test = int(options[options.index('-K') + 2])
+			except:
+				show_help("nie int")
+		if '-R' in options_current and options[options.index('-R') + 1] != ' ' and options[options.index('-R') + 1][0] != '-':
+			try:
+				test = int(options[options.index('-R') + 2])
+			except:
+				show_help("nie int")
+		if '-K' in options_current and options[options.index('-K') + 3] != ' ' and options[options.index('-K') + 3] not in options_all:
+			show_help('po try -K')
+		if '-K' in options_current and options[options.index('-R') + 3] != ' ' and options[options.index('-R') + 3] not in options_all:
+			show_help('po try -R')
+		break
 	if ('-h' or '--help') in options_current and len(options_current) == 1: break
 	if ('-V' or '--Version') in options_current and len(options_current) == 1: break
 	show_help("Na koncu while")
@@ -119,6 +133,7 @@ else:
 
 
 if ('-c' in options_current) or ('-d' in options_current):
+	options_param = options_param[:-1]
 	
 	key = ''
 	if '-k' in options_current:
@@ -206,7 +221,7 @@ if ('-c' in options_current) or ('-d' in options_current):
 	if name_of_rotors_in_dir: print('Loaded rotors:', name_of_rotors_in_dir)
 	if last_rotors_in_dir: print('Loaded rotors:', last_rotors_in_dir)
 
-	exit('klucz i rotorsy loaded')
+	# exit('klucz i rotorsy loaded')
 	
 	
 	files_to_crypt = []
