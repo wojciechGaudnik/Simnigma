@@ -8,24 +8,41 @@ These instructions will get you a copy of the project up and running on your loc
 
 ```
 Simple programme for encrypts and decrypts files.
-Usage:      enigma5 -c [file or files you can use reg.]            Encryption the file (default key will be used the last created in the keys directory,
-                                        the drums will be loaded with all the last ones created in the rotors directory)  
-            enigma5 -d [file]            Decryption the file (default are the same as with encryption)
-            enigma5 -c [file] -k [file or key name in dictionary keys]  Encryption with the indicated key
-            enigma5 -d [file] -k [file]  Decryption with the indicated key
-            enigma5 -c [file] -k [file] -r [first rotor file, or name], [number of loadet rotors]   Encryption with the indicated key and indicated rotors and their number
-            enigma5 -d [file] -k [file] -r [first rotor file], [number of loadet rotors]  Decryption with the indicated key and indicated rotors and their number
+Usage:      enigma5 -c [file of files, you can use reg.]  
+                Encryption the file (default key will be used the last created in the keys directory,
+                the drums will be loaded with all the last ones created in the rotors directory)  
+            enigma5 -d [file of files, you can use reg.]
+                Decryption the file (default are the same as with encryption)
+            enigma5 -c [file] -k [file or key name in dictionary keys]  
+                Encryption with the indicated key
+            enigma5 -d [file] -k [file or key name in dictionary keys]  
+                Decryption with the indicated key
+            enigma5 -c [file] -k [file] -r [first rotor file, or name in dictionary rotors]
+                Encryption with the indicated key and indicated rotors and their number
+            enigma5 -d [file] -k [file] -r [first rotor file, or name in dictionary rotors]
+                Decryption with the indicated key and indicated rotors and their number
             
-            enigma5 -R [name], [number] create rotors, name only common part
-            enigma5 -K [name], [size]    create key, size in bits
+            enigma5 -R [name], [number]     Create rotors, name only common part, number of created rotors
+            enigma5 -K [name], [size]       Create key, size in bits
             
-            enigma5 -v --verbose         show all progress
-            enigma5 -t --tests              run tests encrypt and decrypt
-            enigma5 -h --help               display this help and exit
-            enigma5 -V --version            output version information and exit
+            enigma5 -v --verbose            Show all progress
+            # todo enigma5 -t --tests              Run tests encrypt and decrypt
+            enigma5 -h --help               Display this help and exit
+            enigma5 -V --version            Output version information and exit
    
-Examples:   enigma  
-     
+Examples:   enigma5.py -K your_key_name 2048 
+                First you need to create a random key, 2048 it is size in bit 
+            enigma5.py -R your_rotors_name 20 
+                Then you have to create a random 8-bit rotors, 8bit is the default setting for files, 
+                20 is the number of rotors 
+            enigma5.py -c some_file.txt [-k your_key_name] [-r your_rotors_name] 
+                Now you can encrypt any file or files if you use reg. [for example *], encrypted files
+                will be updated .enc. You can also use a different key or rotors if you insert the -k or -r option.
+                By default, the most recently created keys and rotors are loaded from the keys and rotors 
+                catalogs from the enigma5.py directory.
+            enigma5.py -d some_file.txt.enc [-k your_key_name] [-r your_rotors_name] 
+                And last you can decrypt file or files, remember that you must use the same rotors and keys as
+                 you use to encrypt, what is logically
 			
 
 Mandatory arguments to long options are mandatory for short options too.

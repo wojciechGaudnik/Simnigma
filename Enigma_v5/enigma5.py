@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+
+# todo simnigma
 # todo dorób rekurenje do wychodzenia w katalogu ponad ../
 # todo rotors rozzezenie na rot zroó” !!
 # todo zrób mozliwość szyfrowania ponad 8b rotors https://docs.python.org/2/library/struct.html
@@ -36,99 +38,115 @@ import sys
 import os
 import glob
 
-version = '5.0.0'
-from modules.tools import create_64b_key, load_key, save_key, load_rotors, load_file, encrypt, decrypt, create_rotors, save_rotors, save_file
+from modules.__tools_single import bcolors
+
+from modules.tools import load_key, save_key, load_rotors, load_file, encrypt, decrypt, create_rotors, save_rotors,\
+	save_file, create_random_64b_key, print_long, show_help
+from modules.test_print import test_print
 
 
 # rotors = create_rotors(8, True, 6)
 # save_rotors(rotors,"./rotors/for_file")
 
+version = '5.0.0'
 options = sys.argv
 options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version')
+max_print_length = 110
+min_print_length = 15
 
-options_current = list(filter(lambda opt: opt in options_all , options))# for current in options_all]
+options_current = list(filter(lambda opt: opt in options_all , options))
 for opt in options_current:
 	if options_current.count(opt) > 1:
-		print("Coś poszło nie tak !!! show_help()")
+		show_help()
+		print('---- początek')
+		exit()
 options_param = list(filter(lambda opt: opt not in options_all, options))
 options_param = options_param[1:]
 
 
+show = False
+if (('-v') or ('--verbose')) in options_current:
+	show = True
+	options_current.remove('-v') if ('-v') in options_current else options_current.remove('--verbose')
+
 if ('-c' in options_current) or ('-d' in options_current):
-	# options_current.remove('-c') if '-c' in options_current else options_current.remove('-d')
-	
-	show = False
-	if (('-v') or ('--verbose')) in options_current:
-		show = True
-		options_current.remove('-v') if ('-v') in options_current else options_current.remove('--verbose')
 	
 	key = ''
 	if '-k' in options_current:
 		options_current.remove('-k')
+		key_in_dir =''
 		# if key full path
 		if options[options.index('-k') + 1][0] == '/':
-			key = load_key(options[options.index('-k') + 1])
+			key_in_dir = options[options.index('-k') + 1]
+			key = load_key(key_in_dir)
 			options_param.remove(options[options.index('-k') + 1])
 		# if key path with '..'
 		elif options[options.index('-k') + 1][0:2] == '..':
-			key = load_key(os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-k') + 1][2:])
+			key_in_dir = os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-k') + 1][2:]
+			key = load_key(key_in_dir)
 			options_param.remove(options[options.index('-k') + 1])
 		# if key path with './'
 		elif options[options.index('-k') + 1][0:2] == './':
-			key = load_key(os.getcwd() + options[options.index('-k') + 1][1:])
+			key_in_dir = os.getcwd() + options[options.index('-k') + 1][1:]
+			key = load_key(key_in_dir)
 			options_param.remove(options[options.index('-k') + 1])
 		# if current directrory with .key
 		elif options[options.index('-k') + 1][-4:] == '.key':
-			key = load_key(os.getcwd() + '/' + options[options.index('-k') + 1])
+			key_in_dir = os.getcwd() + '/' + options[options.index('-k') + 1]
+			key = load_key(key_in_dir)
 			options_param.remove(options[options.index('-k') + 1])
 		# if key only name
 		else:
 			key_in_dir = options[0][:options[0].rfind('/')] + '/keys/' + options[options.index('-k') + 1]
 			options_param.remove(options[options.index('-k') + 1])
 			key = load_key(key_in_dir)
+		print('Loaded key:   ', key_in_dir)
 	# if no -k then latest
 	else:
 		last_key_in_dir = max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime)
 		key = load_key(last_key_in_dir)
-	
+		print('Loaded key:   ', last_key_in_dir)
 	
 	rotors = []
+	name_of_rotors_in_dir = ''
+	last_rotors_in_dir = ''
 	if '-r' in options_current:
 		options_current.remove('-r')
 		# if rotor full path
 		if options[options.index('-r') + 1][0] == '/':
-			name_of_rotors = options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
-			number_of_rotors = len(glob.glob(name_of_rotors + '*'))
-			rotors = load_rotors(name_of_rotors, number_of_rotors)
+			name_of_rotors_in_dir = options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
+			number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+			rotors = load_rotors(name_of_rotors_in_dir, number_of_rotors)
 			while (options[options.index('-r') + 1]) in options_param:
 				options_param.remove(options[options.index('-r') + 1])
 		# if rotor path with '..'
 		elif options[options.index('-r') + 1][0:2] == '..':
-			name_of_rotors = os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-r') + 1][
+			name_of_rotors_in_dir = os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-r') + 1][
 			                                                        2:options[options.index('-r') + 1].rfind('_')]
-			number_of_rotors = len(glob.glob(name_of_rotors + '*'))
-			rotors = load_rotors(name_of_rotors, number_of_rotors)
+			number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+			rotors = load_rotors(name_of_rotors_in_dir, number_of_rotors)
 			while (options[options.index('-r') + 1]) in options_param:
 				options_param.remove(options[options.index('-r') + 1])
 		# if rotor path with './'
 		elif options[options.index('-r') + 1][0:2] == './':
-			name_of_rotors = os.getcwd() + '/' + options[options.index('-r') + 1][2:options[options.index('-r') + 1].rfind('_')]
-			number_of_rotors = len(glob.glob(name_of_rotors + '*'))
-			rotors = load_rotors(name_of_rotors, number_of_rotors)
+			name_of_rotors_in_dir = os.getcwd() + '/' + options[options.index('-r') + 1][2:options[options.index('-r') + 1].rfind('_')]
+			number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+			rotors = load_rotors(name_of_rotors_in_dir, number_of_rotors)
 			while (options[options.index('-r') + 1]) in options_param:
 				options_param.remove(options[options.index('-r') + 1])
 		# if current directrory with .pkl
 		elif options[options.index('-r') + 1][-4:] == '.pkl':
-			name_of_rotors = os.getcwd() + '/' + options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
-			number_of_rotors = len(glob.glob(name_of_rotors + '*'))
-			rotors = load_rotors(name_of_rotors, number_of_rotors)
+			name_of_rotors_in_dir = os.getcwd() + '/' + options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
+			number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+			rotors = load_rotors(name_of_rotors_in_dir, number_of_rotors)
 			while (options[options.index('-r') + 1]) in options_param:
 				options_param.remove(options[options.index('-r') + 1])
 		# if only name
 		else:
-			name_of_rotors = options[0][0:options[0].rfind('/')] + '/rotors/' + options[options.index('-r') + 1]
+			name_of_rotors_in_dir = options[0][0:options[0].rfind('/')] + '/rotors/' + options[options.index('-r') + 1]
 			number_of_rotors = len(glob.glob(options[0][0:options[0].rfind('/')] + '/rotors/' + options[options.index('-r') + 1] + '*'))
-			rotors = load_rotors(name_of_rotors, number_of_rotors)
+			rotors = load_rotors(name_of_rotors_in_dir, number_of_rotors)
+			
 			while (options[options.index('-r') + 1]) in options_param:
 				options_param.remove(options[options.index('-r') + 1])
 	# if no -r then latest
@@ -136,7 +154,9 @@ if ('-c' in options_current) or ('-d' in options_current):
 		last_rotors_in_dir = max(glob.glob(options[0][:options[0].rfind('/')] + '/rotors/*'), key = os.path.getatime)[:max(glob.glob(options[0][:options[0].rfind('/')] + '/rotors/*'), key = os.path.getatime).rfind('_')]
 		number_of_rotors = len(glob.glob(last_rotors_in_dir + '*'))
 		rotors = load_rotors(last_rotors_in_dir, number_of_rotors)
-	
+	if name_of_rotors_in_dir: print('Loaded rotors:', name_of_rotors_in_dir)
+	if last_rotors_in_dir: print('Loaded rotors:', last_rotors_in_dir)
+
 	
 	files_to_crypt = []
 	number_of_files = 0
@@ -147,49 +167,45 @@ if ('-c' in options_current) or ('-d' in options_current):
 		elif os.path.isdir(file_my):
 			options_param.pop(options_param.index(file_my))
 		else:
-			print("to nie jest blik ani katalog!!!!!!!!!1")
+			print(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a file'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
 	
 	if ('-c' in options_current):
 		options_current.remove('-c')
 		if options_current:
-			print("help !!!")
-			exit("dupa")
+			show_help()
+			print('----176')
 		for file in files_to_crypt:
 			text_before = load_file(file)
 			if(text_before) == []:
 				continue
+			print('Encrypt file: ', file)
 			text_encrypt = encrypt(rotors, key, text_before)
 			save_file(file + ".enc", text_encrypt)
+			if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt, show_all=True, show_uni=True)
 	
+	
+	# def test_print(rotors, key_enc=[], key_dec=[], text_before=[], text_encrypt=[], text_decrypt=[],
+	#                show_all=False, show_first=False, show_short=False, show_calc=False, show_uni=False):
 	
 	if ('-d' in options_current):
 		options_current.remove('-d')
 		if options_current:
-			print("help !!!")
-			exit("dupa")
-		for file in files_to_crypt:
-			print(file[-4:])
-			if file[-4:] != '.enc':
+			show_help()
+			print('----194')
+		for file_my in files_to_crypt:
+			if file_my[-4:] != '.enc':
+				print(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
 				continue
-			text_before = load_file(file)
+			text_before = load_file(file_my)
 			if(text_before) == []:
 				continue
-			text_encrypt = decrypt(rotors, key, text_before)
-			save_file(file + ".dec", text_encrypt)
+			print('Decrypt file: ', file_my)
+			text_decrypt = decrypt(rotors, key, text_before)
+			save_file(file_my + ".dec", text_decrypt)
+			if show: test_print(rotors=rotors, key_dec=key, text_encrypt=text_before, text_decrypt=text_decrypt, show_all=True, show_uni=True)
+
 	
 elif ('-R' in options_current) or ('-K' in options_current):
-	if ('-R' in options_current):
-		options_current.remove('-R')
-		name_of_rotors = options[options.index('-R') + 1]
-		options_param.remove(name_of_rotors)
-		number_of_rotors = int(options[options.index('-R') + 2])
-		options_param.remove(str(number_of_rotors))
-		if options_current:
-			print("help !!!")
-			exit("dupa")
-		rotors = create_rotors(8, True, number_of_rotors)
-		name_of_rotors = options[0][:options[0].rfind('/')] + '/rotors/' + name_of_rotors
-		save_rotors(rotors, name_of_rotors)
 	if ('-K' in options_current):
 		name_of_key = options[0][:options[0].rfind('/')] + '/keys/' + options[options.index('-K') + 1]
 		key_size = 	options[options.index('-K') + 2]
@@ -197,17 +213,40 @@ elif ('-R' in options_current) or ('-K' in options_current):
 		options_param.remove(options[options.index('-K') + 1])
 		options_param.remove(options[options.index('-K') + 2])
 		if options_current:
-			print("help !!!")
-			exit("dupa")
-		key = create_64b_key(int(key_size))
+			show_help()
+			print('----217')
+		key = create_random_64b_key(int(key_size))
 		save_key(name_of_key, key)
+		print('Key created:    ', name_of_key + '.key')
+		if show: print_long("Key", '[' + key + ']', min_print_length, max_print_length, True)
+	if ('-R' in options_current):
+		options_current.remove('-R')
+		name_of_rotors_in_dir = options[options.index('-R') + 1]
+		options_param.remove(name_of_rotors_in_dir)
+		number_of_rotors = int(options[options.index('-R') + 2])
+		options_param.remove(str(number_of_rotors))
+		if options_current:
+			show_help()
+			print('----230')
+		rotors = create_rotors(8, True, number_of_rotors)
+		name_of_rotors_in_dir = options[0][:options[0].rfind('/')] + '/rotors/' + name_of_rotors_in_dir
+		save_rotors(rotors, name_of_rotors_in_dir)
+		for r in range(1, number_of_rotors + 1):
+			print('Rotor {} created:'.format(r), name_of_rotors_in_dir + '_' + str(r) + '.pkl')
+		if show: print_long("Rotor", rotors, min_print_length, max_print_length, False)
+
 elif ('-t' in options_current) or ('--tests' in options_current):
 	pass
 elif ('-h' in options_current) or ('--help' in options_current):
-	pass
+	show_help()
 elif ('-V' in options_current) or ('--version' in options_current):
-	print("enigma version", version)
- 
+	print("Enigma version", version)
+else:
+	show_help()
+	print('----na koncu')
+
+
+# todo ---------- this part is our playground :)----------
 	# print("--files_to_encrypt:", files_to_crypt)
 	#
 	# print('------------------------')
@@ -355,23 +394,7 @@ elif ('-V' in options_current) or ('--version' in options_current):
 # 	# print(rotors[0])
 #
 	
-if len(options) == 2:
-	print("tutaj będę ")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# todo ---------- this part is our playground :)----------
 
 # print("helo from:", __name__)
 

@@ -1,5 +1,5 @@
-from Enigma_all.Enigma_v5.modules.__tools_single import bcolors, generate_from_64b_inter_key
-from Enigma_all.Enigma_v5.modules.tools import check_text_const, check_rand_rotors, create_key, check_patterns, \
+from modules.__tools_single import bcolors, generate_from_64b_inter_key
+from modules.tools import check_text_const, check_rand_rotors, create_key, check_patterns, \
 	check_all_patterns, key_from_64b_to_dec, calc_number_comb, print_long
 
 import decimal
@@ -18,10 +18,12 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 		
 		
 	# Checked length of the pattern
-	cal_pattern_length = calc_number_comb(rotors, key_enc)
+	key = key_enc if key_enc else key_dec
+	cal_pattern_length = calc_number_comb(rotors, key)
 	
 	max_print_length = 110
 	min_print_length = 15
+	space = 47
 	if show_all or show_first:
 		# Print rotors
 		print_long("Rotor", rotors, min_print_length, max_print_length)
@@ -31,52 +33,57 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 		if key_enc_before and isinstance(key_enc_before, str): print_long("Enc. key in Uni", '[' + key_enc_before + ']', min_print_length, max_print_length, False)
 		if key_dec_before and isinstance(key_dec_before, list): print_long("Decrypt key", key_dec, min_print_length, max_print_length, False)
 		if key_dec_before and isinstance(key_dec_before, str): print_long("Dec. key in Uni", '[' + key_dec_before + ']', min_print_length, max_print_length, False)
-		print_long("Int. enc. key", key_enc, min_print_length, max_print_length, False)
-		print_long("Int. dec. key", key_dec, min_print_length, max_print_length, False)
+		if key_enc_before: print_long("Enc. int. key", key_enc, min_print_length, max_print_length, False)
+		if key_dec_before: print_long("Dec. int. key", key_dec, min_print_length, max_print_length, False)
 		
 		# Print texts before, encrypt and decrypt
-		if (show_uni == False): print_long("Text before", text_before, min_print_length, max_print_length, False)
-		if (show_uni == True): print_long("Text be. in Uni", [chr(a) for a in text_before ], 15, max_print_length, False)
-		if (show_uni == False): print_long("Text encrypt", text_encrypt, min_print_length, max_print_length, False)
-		if (show_uni == True): print_long("Text en. in Uni", [chr(a) for a in text_encrypt], 15, max_print_length, False)
-		if (show_uni == False): print_long("Text decrypt", text_decrypt, min_print_length, max_print_length, False)
-		if (show_uni == True): print_long("Text de. in Uni", [chr(a) for a in text_decrypt], 15, max_print_length, False)
+		if text_before:
+			if (show_uni == False): print_long("Text before", text_before, min_print_length, max_print_length, False)
+			if (show_uni == True): print_long("Text be. in Uni", [chr(a) for a in text_before ], 15, max_print_length, False)
+		if text_encrypt:
+			if (show_uni == False): print_long("Text encrypt", text_encrypt, min_print_length, max_print_length, False)
+			if (show_uni == True): print_long("Text en. in Uni", [chr(a) for a in text_encrypt], 15, max_print_length, False)
+		if text_decrypt:
+			if (show_uni == False): print_long("Text decrypt", text_decrypt, min_print_length, max_print_length, False)
+			if (show_uni == True): print_long("Text de. in Uni", [chr(a) for a in text_decrypt], 15, max_print_length, False)
 	
 	if show_all or show_short:
 		# Print short rotors info
-		print("Rotors, number of key-val:" + " " * 21, "[" + format(decimal.Decimal(len(rotors[0])), '.2E') + "]")
-		print("Rotors size in bit:" + " " * 28, "[" + str(int(log(len(rotors[0]), 2))) + " bit]")
-		print("Rotors, number existing:" + " " * 23, "[" + str(len(rotors)) + " rotors]")  # number of exists rotors
+		print("Rotors size in bit:" + " " * (space - 19), "[" + str(int(log(len(rotors[0]), 2))) + " bit]")
+		print("Rotors, number existing:" + " " * (space - 24), "[" + str(len(rotors)) + " rotors]")  # number of exists rotors
+		key_len = len(key_enc) if key_enc else len(key_dec)
 		for i in range(len(rotors), 0, -1):
-			if len(key_dec) % i == 0:
-				print("Rotors, number used:" + " " * 27, "[" + str(i) + " rotors]")
-				print("Number of passes:" + " " * 30, "[" + str(len(key_dec) // i) + " passes]")
+			if key_len % i == 0:
+				print("Rotors, number used:" + " " * (space - 20), "[" + str(i) + " rotors]")
+				print("Number of passes:" + " " * (space - 17), "[" + str(key_len // i) + " passes]")
 				break
+		print("Rotors, number of key-val:" + " " * (space - 26), "[" + format(decimal.Decimal(len(rotors[0])), '.2E') + "]")
 		if check_rand_rotors(rotors)[0]:
-			print("Minimum value in rotor:\t\t\t\t\t\t\t" + "[" + str(min(rotors[0])) + " min]")
-			print("Maximum value in rotor:\t\t\t\t\t\t\t" + "[" + str(max(rotors[0])) + " max]")
-			print("Equality test of rotors:\t\t\t\t\t\t" + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
+			print("Minimum value in rotor:" + " " * (space - 22) + "[" + str(min(rotors[0])) + " min]")
+			print("Maximum value in rotor:" + " " * (space - 22) + "[" + str(max(rotors[0])) + " max]")
+			print("Equality test of rotors:" + " " * (space - 23) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 			if check_rand_rotors(rotors)[1]:
-				print("Randomness and integrity rotor test:\t\t\t" + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
+				print("Randomness and integrity rotor test:" + " " * (space - 35) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 			else:
-				print("Randomness and integrity rotor test:\t\t\t" + "[" + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")
+				print("Randomness and integrity rotor test:" + " " * (space - 35) + "[" + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")
 		else:
-			print("Minimum value in rotor:\t\t\t\t\t\t\t" + "[" + str(min(rotors[0])) + " min]")
-			print("Maximum value in rotor:\t\t\t\t\t\t\t" + "[" + str(max(rotors[0])) + " max]")
-			print("Equality test of rotors:\t\t\t\t\t\t" + "[" + bcolors.BOLD + bcolors.ORANGE + "FAIL" + bcolors.ENDC + "[")
+			print("Minimum value in rotor:" + " " * (space - 22) + "[" + str(min(rotors[0])) + " min]")
+			print("Maximum value in rotor:" + " " * (space - 22) + "[" + str(max(rotors[0])) + " max]")
+			print("Equality test of rotors:" + " " * (space - 23) + "[" + bcolors.BOLD + bcolors.ORANGE + "FAIL" + bcolors.ENDC + "[")
 		
 		
 		# Print short keys info
-		print("Key enc. len. in num. el.:" + " " * 21, "[" + format(decimal.Decimal(len(key_enc_before)), '.2E') + "]")
-		print("Key int. enc. len. in num. el.:" + " " * 16, "[" + format(decimal.Decimal(len(create_key(key_enc, rotors))), '.2E') + "]")
-		if isinstance(key_enc, str): print("Key size in bit of num. in dec.:" + " " * 15, "[" + str(int(log(key_from_64b_to_dec(key_enc), 2))) + " bit]") #((log(l, 2)))
-		print("Key the same:" + " " * 34, "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]") if key_enc == key_dec else \
-			print("Key the same:" + " " * 34, "[" + bcolors.ORANGE + "FAIL" + bcolors.ENDC + "]")
+		key_len_before = len(key_enc_before) if key_enc_before else len(key_dec_before)
+		print("Key len. in num. el.:" + " " * (space - 20) + "[" + format(decimal.Decimal(key_len_before), '.2E') + "]")
+		print("Key int. len. in num. el.:" + " " * (space - 25) + "[" + format(decimal.Decimal(key_len), '.2E') + "]")
+		if (key_enc) and (key_dec):
+			print("Key the same:" + " " * (space - 12) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]") if (key_enc == key_dec)  else \
+				print("Key the same:" + " " * (space - 12) + "[" + bcolors.ORANGE + "FAIL" + bcolors.ENDC + "]")
 		
 		
 		# Print short text info
-		print("Text before length:" + " " * 28, "[" + format(decimal.Decimal(len(text_before)), '.2E') + "]")
-		print("Text before constant:" + " " * 26, "[{}]".format("Yes" if check_text_const(text_before) else "No"))
+		print("Text before length:" + " " * (space - 18) + "[" + format(decimal.Decimal(len(text_before)), '.2E') + "]")
+		print("Text before constant:" + " " * (space - 20) + "[{}]".format("Yes" if check_text_const(text_before) else "No"))
 	
 	# # Calculated variations with repetitions
 	# cal_name_length = "Calculated variations with repetitions:\t\t\t"
@@ -97,30 +104,33 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 				# print("Patterns 3 shorter:" + " " * 28, patterns_all)
 				name = "Calculated and checked pattern test:"
 				if cal_pattern_length == patterns_over[0][0]:
-					print(name + " " * 11, "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
+					print(name + " " * (space - 35) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 				else:
-					print(name + " " * 11, "[" + bcolors.BOLD + bcolors.WARNING + "FAIL" + bcolors.ENDC + "]")
+					print(name + " " * (space - 35) + "[" + bcolors.BOLD + bcolors.WARNING + "FAIL" + bcolors.ENDC + "]")
 			else:
-				print("Patterns over:" + " " * 33, "[Text to short]")
+				print("Patterns over:" + " " * (space - 13) + "[Text to short]")
 	
 	
 	# Calculated number of combination
-	cal_name_length = "Calculated number of combination:\t\t\t\t"
+	cal_name_length = "Calculated number of combination:" + " " * (space - 32)
 	print(cal_name_length + "[" + format(decimal.Decimal(cal_pattern_length), '.2E') + "]")
-	
+
 	# Encrypt and decrypt tests
-	if ((text_before != text_encrypt) and (text_before == text_decrypt) and (key_enc == key_dec)) or \
-			((text_before != text_encrypt) and (text_before != text_decrypt) and (key_enc != key_dec)):
-		print("Encrypt, decrypt and keys test:\t\t\t\t\t" + bcolors.BOLD + "[PASS]" + bcolors.ENDC)
-	else:
-		if ((text_before != text_encrypt) and (text_before != text_decrypt) and (key_enc == key_dec)):
-			print("Decrypt test:\t\t\t\t\t\t\t\t\t" + bcolors.WARNING + bcolors.BOLD + "[FAIL]" + bcolors.ENDC)
+	if text_before and text_decrypt:
+		if ((text_before != text_encrypt) and (text_before == text_decrypt) and (key_enc == key_dec)) or \
+				((text_before != text_encrypt) and (text_before != text_decrypt) and (key_enc != key_dec)):
+			print("Encrypt, decrypt and keys test:" + " " * (space - 30) + "[" +bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 		else:
-			if ((text_before != text_encrypt) and (text_before == text_decrypt) and (key_enc != key_dec)):
-				print("Keys test:\t\t\t\t\t\t\t\t\t\t" + bcolors.WARNING + bcolors.BOLD + "[FAIL]" + bcolors.ENDC)
+			if ((text_before != text_encrypt) and (text_before != text_decrypt) and (key_enc == key_dec)):
+				print("Decrypt test:" + " " * (
+						space - 12) + "[" + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")
 			else:
-				if (text_before == text_encrypt):
-					print(
-						"Encrypt test:\t\t\t\t\t\t\t\t\t" + bcolors.WARNING + bcolors.BOLD + "[FAIL]" + bcolors.ENDC)
+				if ((text_before != text_encrypt) and (text_before == text_decrypt) and (key_enc != key_dec)):
+					print("Keys test:" + " " * (
+							space - 9) + '[' + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")
+				else:
+					if (text_before == text_encrypt):
+						print("Encrypt test:" + " " * (
+								space - 12) + '[' + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")
 	
 	print("-" * max_print_length)

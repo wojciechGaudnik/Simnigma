@@ -109,10 +109,10 @@ class EncryptSet:
 			if self.__print_test == 0:
 				# sys.stdout.flush()
 				# sys.stdout.write('\r\b')
-				print("\rProgress encrypt:    \t\t\t\t\t\t\t[100 %]          ")
+				print("\rProgress encrypt:" + " " * 31 + "[100 %]" + " " * 10)
 				self.__print_test = -1
 		else:
-			sys.stdout.write("\rProgress encrypt ... \t\t\t\t\t\t\t[%.4f %%]    " % (progress))
+			sys.stdout.write("\rProgress encrypt ... " + " " * 27 + "[%.4f %%]    " % (progress))
 		
 		if len(enc) == 1:
 			enc = self.__init__enc
@@ -209,10 +209,10 @@ class DecryptSet:
 		progress = (len(self.__list_after) * 100) / self.__list_before_max
 		if progress == 100:
 			if self.__print_test == 0:
-				print("\rProgress decrypt:    \t\t\t\t\t\t\t[100 %]          ")
+				print("\rProgress decrypt:" + " " * 31 + "[100 %]" + " " * 10)
 				self.__print_test = -1
 		else:
-			sys.stdout.write("\rProgress decrypt ... \t\t\t\t\t\t\t[%.4f %%]  " % (progress))
+			sys.stdout.write("\rProgress decrypt ... " + " " * 27 + "[%.4f %%]    " % (progress))
 		
 		if len(dec) == 1:
 			dec = self.__init__dec
