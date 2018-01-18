@@ -15,7 +15,8 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 		key_enc = generate_from_64b_inter_key(key_enc, rotors)
 	if isinstance(key_dec, str):
 		key_dec = generate_from_64b_inter_key(key_dec, rotors)
-		
+	# if text_before == []: text_before = text_encrypt[:]
+	
 		
 	# Checked length of the pattern
 	key = key_enc if key_enc else key_dec
@@ -82,8 +83,8 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 		
 		
 		# Print short text info
-		print("Text before length:" + " " * (space - 18) + "[" + format(decimal.Decimal(len(text_before)), '.2E') + "]")
-		print("Text before constant:" + " " * (space - 20) + "[{}]".format("Yes" if check_text_const(text_before) else "No"))
+		print("Text before length:" + " " * (space - 18) + "[" + format(decimal.Decimal(len(text_before or text_encrypt)), '.2E') + "]")
+		print("Text before constant:" + " " * (space - 20) + "[{}]".format("Yes" if check_text_const(text_before or text_encrypt) else "No"))
 	
 	# # Calculated variations with repetitions
 	# cal_name_length = "Calculated variations with repetitions:\t\t\t"
@@ -91,7 +92,7 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 	
 	
 	if show_all or show_calc:
-		if check_text_const(text_before):
+		if text_before != [] and check_text_const(text_before):
 			# check_name_length = "Checked length of the pattern:\t\t\t\t\t"
 			if len(text_encrypt) > cal_pattern_length * 3:
 				patterns_over = check_patterns(text_encrypt, cal_pattern_length // 2, 1, True)

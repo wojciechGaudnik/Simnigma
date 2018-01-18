@@ -19,13 +19,13 @@ def __cre_rotor(size_in_max, mix):
 	return dic
 
 
-def __save_rotor(obj, name):
-	with open(name + '.pkl', 'wb') as f:
-		pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+def __save_rotor(rotor, name):
+	with open(name + '.rot', 'wb') as f:
+		pickle.dump(rotor, f, pickle.HIGHEST_PROTOCOL)
 
 
 def __load_rotor(name):
-	with open(name + '.pkl', 'rb') as f:
+	with open(name + '.rot', 'rb') as f:
 		return pickle.load(f)
 
 

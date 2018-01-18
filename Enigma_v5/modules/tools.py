@@ -7,6 +7,8 @@ import sys
 
 from math import log
 
+import pickle
+
 from .__tools_single import __cre_rotor, __save_rotor, __load_rotor, __check_rand_rotor, generate_from_64b_inter_key
 from .core import EncryptNextRotor, EncryptSet, DecryptNextRotor, DecryptSet
 
@@ -28,6 +30,18 @@ def save_rotors(rotors, name):
 		
 def load_rotors(name, number):
 	return ([__load_rotor(x) for x in (name + '_' + str(x) for x in range(1, number + 1))])
+	
+
+def save_rotors_in_one_file(rotors, name):
+	name += ".rotors" if ".rotors" not in name[-7:] else ""
+	with open(name, 'wb') as f:
+		pickle.dump(rotors, f, pickle.HIGHEST_PROTOCOL)
+
+
+def load_rotors_from_one_file(name):
+	name += ".rotors" if ".rotors" not in name[-7:] else ""
+	with open(name, 'rb') as f:
+		return pickle.load(f)
 
 
 def save_key(name, key):
@@ -568,6 +582,12 @@ def convert_str_to_list(text_before):
 	for c in text_before:
 		text_in_list.append(ord(c))
 	return text_in_list
+
+def convert_list_to_str(text_before):
+	text_in_str = ''
+	for c in text_before:
+		text_in_str += chr(c)
+	return text_in_str
 
 
 def show_help(place):

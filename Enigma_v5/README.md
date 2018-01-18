@@ -26,7 +26,7 @@ Usage:      enigma5 -c [file of files, you can use reg.]
             enigma5 -R [name], [number]     Create rotors, name only common part, number of created rotors
             
             enigma5 -v --verbose            Show all progress
-            enigma5 -s --silent             If you wont to encrypt text directly from keybord or if you decript txt file, 
+            enigma5 -s --silent            If you wont to encrypt text directly from keybord or if you decript txt file, 
                                             use this option if you wont only read mesages without save files
             
             enigma5 -h --help               Display this help and exit
