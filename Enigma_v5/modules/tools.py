@@ -9,7 +9,7 @@ from math import log
 
 import pickle
 
-from .__tools_single import __cre_rotor, __save_rotor, __load_rotor, __check_rand_rotor, generate_from_64b_inter_key
+from .__tools_single import __cre_rotor, __save_rotor, __load_rotor, __check_rand_rotor, generate_from_64b_inter_key, bcolors
 from .core import EncryptNextRotor, EncryptSet, DecryptNextRotor, DecryptSet
 
 
@@ -53,13 +53,23 @@ def save_key(name, key):
 		f.close()
 
 
-def load_key(name):
+def load_key(name, show=False):
 	name += ".key" if ".key" not in name[-4:] else ""
-	f = open(name, "rb")
+	# f = open(name, "rb")
+	# try:
+	# 	key_list = f.read()
+	# finally:
+	# 	f.close()
 	try:
+		f = open(name, 'rb')
 		key_list = f.read()
-	finally:
+		print('Loaded key:   ', name)
 		f.close()
+	except:
+		exit(bcolors.WARNING +  "Error: Can't open key file {}".format(name) + bcolors.ENDC)
+	
+	
+	
 	key = ""
 	key_ret = ""
 	for c in key_list:

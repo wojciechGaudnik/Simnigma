@@ -48,42 +48,165 @@ from modules.test_print import test_print
 from modules.__tools_single import bcolors
 
 
-# rotors = create_rotors(2, True, 3)
-# print(rotors)
-# save_rotors_in_one_file(rotors, 'nowe')
-# rotors = []
-# print('puste', rotors)
-# rotors = load_rotors_from_one_file('nowe')
-# print(rotors)
-# exit()
+version = '5.0.0'
+options = sys.argv + [' ',]
+options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version',
+               '-s', '--silent')
+max_print_length = 110
+min_print_length = 15
+
+
+files_to_encrypt = []
+files_to_decrypt = []
+key_name_load = ''
+rotors_name_load = ''
+key_name_save = ''
+key_size = 0
+rotors_name_save = ''
+rotors_number = 0
+show = False
+only_screen = False
+key = ''
+rotors = []
+
+
+print('1 options----------', options)
+if '-c' in options:
+	for file_my in options[options.index('-c') + 1:]:
+		if file_my[0] != '-' and file_my[0] != ' ':
+			files_to_encrypt.append(file_my)
+		else:
+			break
+	del options[options.index('-c') + 1: options.index('-c') + len(files_to_encrypt) + 1]
+	options.remove('-c')
+if '-d' in options:
+	for file_my in options[options.index('-d') + 1:]:
+		if file_my[0] != '-' and file_my[0] != ' ':
+			files_to_decrypt.append(file_my)
+		else:
+			break
+	del options[options.index('-d') + 1: options.index('-d') + len(files_to_decrypt) + 1]
+	options.remove('-d')
+
+if '-k' in options:
+	if options[options.index('-k') + 1][0] != '-':
+		key_name_load += options[options.index('-k') + 1]
+	del options[options.index('-k') + 1]
+	options.remove('-k')
+
+if '-r' in options:
+	if options[options.index('-r') + 1][0] != '-':
+		rotors_name_load += options[options.index('-r') + 1]
+	del options[options.index('-r') + 1]
+	options.remove('-r')
+
+if '-v' in options or '--verbose' in options:
+	show = True
+	try: options.remove('-v')
+	except: options.remove('--verbose')
+
+if '-s' in options or '--silent' in options:
+	only_screen = True
+	try: options.remove('-s')
+	except: options.remove('--silent')
+	
+if '-K' in options:
+	if options[options.index('-K') + 1][0] != '-':
+		key_name_save += options[options.index('-K') + 1]
+	try:
+		key_size = options[options.index('-K') + 2]
+		key_size = int(key_size)
+	except:
+		show_help('Invalid size of key')
+	del options[options.index('-K') + 2]
+	del options[options.index('-K') + 1]
+	options.remove('-K')
+
+
+if '-R' in options:
+	if options[options.index('-R') + 1][0] != '-':
+		rotors_name_save += options[options.index('-R') + 1]
+	try:
+		rotors_number = options[options.index('-R') + 2]
+		rotors_number = int(rotors_number)
+	except:
+		show_help('Invalid number of rotors')
+	del options[options.index('-R') + 2]
+	del options[options.index('-R') + 1]
+	options.remove('-R')
+
+if '-h' in options  or '--help' in options:
+	pass
+
+if '-V' in options or '--version' in options:
+	print("Simnigma version", version)
+
+print('-11 rotors_number-----', rotors_number)
+print('-11 rotors_name_save--', rotors_name_save)
+print('-10 key_size----------', key_size)
+print('-9 key_name_save------', key_name_save)
+print('-8 only_screen--------', only_screen)
+print('-7 show---------------', show)
+print('-6 rotors_name_load---', rotors_name_load)
+print('-5 key_name_load------', key_name_load)
+print('-4 files_to_decrypt---', files_to_decrypt)
+print('-3 files_to_encrypt---', files_to_encrypt)
+print('-2 options------------', options)
+
+if len(options) > 2:
+	show_help("Invalid options")
+
+key_in_dir = ''
+if key_name_load:
+	if key_name_load[0] == '/':
+		key = load_key(key_name_load, True)
+	elif key_name_load[0:2] == '..':
+		key = load_key(os.getcwd()[:os.getcwd().rfind('/')] + key_name_load[2:], True)
+	elif key_name_load[0:2] == './':
+		key = load_key(os.getcwd() + key_name_load[1:], True)
+	elif key_name_load[-4:] == '.key':
+		key = load_key(os.getcwd() + '/' + key_name_load, True)
+	elif key_name_load:
+		key = load_key(options[0][:options[0].rfind('/')] + '/keys/' + key_name_load, True)
+else:
+	if sys.platform == 'linux':
+		if glob.glob("/media/**/*.key", recursive=True):
+			key = load_key(max(glob.glob("/media/**/*.key", recursive=True), key=os.path.getatime), True)
+	if (glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'))  and not key:
+		key = load_key(max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime), True)
+
+
+rotors_in_dir = ''
 
 
 
 
 
-# text_before = sys.stdin.readlines('>>>')
-# print(text_before)
 
-# text_before = []
-# print( "Enter/Paste your content. Ctrl-D or Ctrl-C to save it.")
-# while True:
-# 	try:
-# 		if text_before: text_before += '\n'
-# 		text_before += input('>>> ')
-# 	except KeyboardInterrupt:
-# 		break
-# 	except EOFError:
-# 		break
-# text_before_in_dec = convert_str_to_list(text_before)
 
-# print('\n', text_before)
-# print(text_before_in_dec)
+exit('OK')
+	
+
+
+
+
+
+
+
+
+
+exit('OK stop')
+# todo -------------------------------
+
+
+
+
+
 
 
 
 version = '5.0.0'
 options = sys.argv + [' ',]
-# options += [' ',]
 options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version',
                '-s', '--silent')
 max_print_length = 110
@@ -165,6 +288,9 @@ while len(options_current) <= 3:
 	show_help("Na koncu while")
 else:
 	show_help('Else z while')
+
+
+
 
 
 if ('-c' in options_current) or ('-d' in options_current):
