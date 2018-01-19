@@ -41,7 +41,8 @@ import glob
 
 from modules.tools import load_key, save_key, load_rotors, load_file, encrypt, decrypt, create_rotors, save_rotors,\
 	save_file, create_random_64b_key, print_long, show_help, convert_str_to_list, convert_list_to_str, \
-	save_rotors_in_one_file, load_rotors_from_one_file
+	save_rotors_in_one_file, load_rotors_from_one_file, load_file_all
+
 
 
 from modules.test_print import test_print
@@ -154,38 +155,64 @@ print('-3 files_to_encrypt---', files_to_encrypt)
 print('-2 options------------', options)
 
 if len(options) > 2:
-	show_help("Invalid options")
+	show_help(bcolors.WARNING + "Error: Invalid options" + bcolors.ENDC)
+if '-c' in sys.argv and files_to_encrypt == []:
+	show_help(bcolors.WARNING + "Error: file to encrypt or to save if -s" + bcolors.ENDC)
+if '-d' in sys.argv and files_to_decrypt == []:
+	show_help(bcolors.WARNING + "Error: file to decrypt or to load if -s" + bcolors.ENDC)
+if '-k' in sys.argv and key_name_load == ' ':
+	show_help(bcolors.WARNING + "Error: name of key to load" + bcolors.ENDC)
+if '-r' in sys.argv and rotors_name_load == ' ':
+	show_help(bcolors.WARNING + "Error: name of rotors to load" + bcolors.ENDC)
 
-key_in_dir = ''
+
+
+# key_in_dir = ''
 if key_name_load:
 	if key_name_load[0] == '/':
-		key = load_key(key_name_load, True)
+		key = load_file_all(key_name_load, 'key', True)
 	elif key_name_load[0:2] == '..':
-		key = load_key(os.getcwd()[:os.getcwd().rfind('/')] + key_name_load[2:], True)
+		key = load_file_all(os.getcwd()[:os.getcwd().rfind('/')] + key_name_load[2:], 'key', True)
 	elif key_name_load[0:2] == './':
-		key = load_key(os.getcwd() + key_name_load[1:], True)
+		key = load_file_all(os.getcwd() + key_name_load[1:], 'key', True)
 	elif key_name_load[-4:] == '.key':
-		key = load_key(os.getcwd() + '/' + key_name_load, True)
+		key = load_file_all(os.getcwd() + '/' + key_name_load, 'key', True)
 	elif key_name_load:
-		key = load_key(options[0][:options[0].rfind('/')] + '/keys/' + key_name_load, True)
+		key = load_file_all(options[0][:options[0].rfind('/')] + '/keys/' + key_name_load, 'key', True)
 else:
 	if sys.platform == 'linux':
 		if glob.glob("/media/**/*.key", recursive=True):
-			key = load_key(max(glob.glob("/media/**/*.key", recursive=True), key=os.path.getatime), True)
+			key = load_file_all(max(glob.glob("/media/**/*.key", recursive=True), key=os.path.getatime), 'key', True)
 	if (glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'))  and not key:
-		key = load_key(max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime), True)
+		key = load_file_all(max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime), 'key', True)
 
 
-rotors_in_dir = ''
-
-
+# rotors_in_dir = ''
+if rotors_name_load:
+	if rotors_name_load[0] == '/':
+		rotors = load_file_all(rotors_name_load, 'rotors_from_one_file', True)
+	elif rotors_name_load[0:2] == '..':
+		rotors = load_file_all(os.getcwd()[:os.getcwd().rfind('/')] + rotors_name_load[2:], 'rotors_from_one_file', True)
+	elif rotors_name_load[0:2] == './':
+		rotors = load_file_all(os.getcwd() + rotors_name_load[1:], 'rotors_from_one_file', True)
+	elif rotors_name_load[-4:] == '.rotor':
+		rotors = load_file_all(os.getcwd() + '/' + rotors_name_load, 'rotors_from_one_file', True)
+	elif rotors_name_load:
+		rotors = load_file_all(options[0][:options[0].rfind('/')] + '/rotors/' + rotors_name_load, 'rotors_from_one_file', True)
+else:
+	if sys.platform == 'linux':
+		if glob.glob("/media/**/*.rotors", recursive=True):
+			rotors = load_file_all(max(glob.glob("/media/**/*.rotors", recursive=True), key=os.path.getatime), 'rotors_from_one_file', True)
+	if (glob.glob(options[0][:options[0].rfind('/') + 1] + 'rotors/*')) and not rotors:
+		rotors = load_file_all(max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'rotors/*'), key=os.path.getatime), 'rotors_from_one_file', True)
 
 
 
 
 
 exit('OK')
-	
+# todo long_print if show print(key)
+
 
 
 

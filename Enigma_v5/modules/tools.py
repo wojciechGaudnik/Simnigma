@@ -20,6 +20,10 @@ def create_rotors(size_in_bit, mix, number_of_rotors): # todo daj mix Tru i na k
 	size = 2 ** size_in_bit
 	return ([__cre_rotor(size, mix) for _ in range(0, number_of_rotors)])
 	
+
+
+
+
 	
 def save_rotors(rotors, name):
 	i = 1
@@ -95,6 +99,41 @@ def load_file(name):
 		f.close()
 	file = list(file)
 	return file[:-1]
+
+
+
+def load_file_all(name, what_load = '', show = False, number = 0):
+	if what_load == 'key':
+		name += ".key" if ".key" not in name[-4:] else ""
+		key_list = []
+		try:
+			f = open(name, 'rb')
+			key_list = f.read()
+			if show == True: print('Loaded key:   ', name)
+			f.close()
+		except:
+			exit(bcolors.WARNING + "Error: Can't open key file {}".format(name) + bcolors.ENDC)
+		key = ""
+		key_ret = ""
+		for c in key_list:
+			key += chr(c)
+		key_ret = key_ret.join(key)
+		return key_ret[:-1]
+	if what_load == 'rotors_from_one_file':
+		name += ".rotors" if ".rotors" not in name[-7:] else ""
+		rotors = {}
+		try:
+			f = open(name, 'rb')
+			rotors = pickle.load(f)
+			if show == True:  print('Loaded rotors:', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't open rotors file {}".format(name) + bcolors.ENDC)
+		return rotors
+	
+
+
+
+
 
 def check_rand_rotors(rotors):
 	__key_min = min(rotors[0])
@@ -601,7 +640,6 @@ def convert_list_to_str(text_before):
 
 
 def show_help(place):
-	print(place)
 	print("""
 Simple programme for encrypts and decrypts files.
 Usage:      enigma5 -c [file of files, you can use reg.]
@@ -640,4 +678,4 @@ Examples:   enigma5.py -K your_key_name 2048
                 And last you can decrypt file or files, remember that you must use the same rotors and keys as
                  you use to encrypt, what is logically
 	""")
-	exit()
+	exit(place)
