@@ -103,14 +103,15 @@ def load_file(name):
 
 
 def load_file_all(name, what_load = '', show = False, number = 0):
+	
 	if what_load == 'key':
 		name += ".key" if ".key" not in name[-4:] else ""
 		key_list = []
 		try:
 			f = open(name, 'rb')
 			key_list = f.read()
-			if show == True: print('Loaded key:   ', name)
 			f.close()
+			if show == True: print('Loaded key:   ', name)
 		except:
 			exit(bcolors.WARNING + "Error: Can't open key file {}".format(name) + bcolors.ENDC)
 		key = ""
@@ -119,17 +120,77 @@ def load_file_all(name, what_load = '', show = False, number = 0):
 			key += chr(c)
 		key_ret = key_ret.join(key)
 		return key_ret[:-1]
+	
 	if what_load == 'rotors_from_one_file':
 		name += ".rotors" if ".rotors" not in name[-7:] else ""
 		rotors = {}
 		try:
 			f = open(name, 'rb')
 			rotors = pickle.load(f)
+			f.close()
 			if show == True:  print('Loaded rotors:', name)
 		except:
 			exit(bcolors.WARNING + "Error: Can't open rotors file {}".format(name) + bcolors.ENDC)
 		return rotors
 	
+	if what_load == 'rotors_from_files':
+		name += ".rot" if ".rot" not in name[-4:] else ""
+		return ([__load_rotor(x) for x in (name + '_' + str(x) for x in range(1, number + 1))])
+	
+	if what_load == 'file':
+		file = []
+		try:
+			f = open(name, "rb")
+			file = f.read()
+			f.close()
+			if show == True:  print('Loaded file:  ', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't open file {}".format(name) + bcolors.ENDC)
+		file = list(file)
+		return file[:-1]
+		
+	
+
+
+def save_file_all(name, obj, what_save = '', show = False, number = 0):
+	
+	if what_save == 'key':
+		name += ".key" if ".key" not in name[-4:] else ""
+		f = open(name, "wb")
+		try:
+			f.write(bytes(obj + "\n", 'ascii'))
+			f.close()
+			if show == True: print('Saved key:   ', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't save key file {}".format(name) + bcolors.ENDC)
+
+	if what_save == 'rotors_in_one_file':
+		name += ".rotors" if ".rotors" not in name[-7:] else ""
+		try:
+			f = open(name, 'wb')
+			pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+			f.close()
+			if show == True: print('Saved rotors:', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't save rotors file {}".format(name) + bcolors.ENDC)
+
+	if what_save == 'rotors_in_files':
+		name += ".rot" if ".rot" not in name[-4:] else ""
+		for i, rotor in enumerate(obj):
+			__save_rotor(rotor, name + '_' + str(i +1))
+
+	if what_save == 'file':
+		obj.append(10)
+		try:
+			f = open(name, "wb")
+			f.write(bytes(obj))
+			f.close()
+			if show == True:  print('Saved file:  ', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't save file {}".format(name) + bcolors.ENDC)
+
+
+
 
 
 
@@ -148,6 +209,29 @@ def check_rand_rotors(rotors):
 				or __value_min != min(rotor.values()) or __value_max != max(rotor.values()):
 			return False, __random
 	return True, __random
+
+
+def printd(*argss):
+	messages = ''
+	for arg in argss:
+		messages += str(arg)
+	print(bcolors.INYELLOW + 'D ---> ' + messages + bcolors.ENDC)
+
+def print_format_table():
+    """
+    prints table of formatted text format options
+    """
+    for style in range(10):
+        for fg in range(20,40):
+            s1 = ''
+            for bg in range(35,60):
+                format = ';'.join([str(style), str(fg), str(bg)])
+                s1 += '\x1b[%sm %s \x1b[0m' % (format, format)
+            print(s1)
+        print('\n')
+
+# print_format_table()
+
 
 
 # todo I know what you mean :) but it's only to see if it's possible.

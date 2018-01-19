@@ -41,7 +41,7 @@ import glob
 
 from modules.tools import load_key, save_key, load_rotors, load_file, encrypt, decrypt, create_rotors, save_rotors,\
 	save_file, create_random_64b_key, print_long, show_help, convert_str_to_list, convert_list_to_str, \
-	save_rotors_in_one_file, load_rotors_from_one_file, load_file_all
+	save_rotors_in_one_file, load_rotors_from_one_file, load_file_all, save_file_all, printd
 
 
 
@@ -71,7 +71,7 @@ key = ''
 rotors = []
 
 
-print('1 options----------', options)
+printd('1 options----------', options)
 if '-c' in options:
 	for file_my in options[options.index('-c') + 1:]:
 		if file_my[0] != '-' and file_my[0] != ' ':
@@ -142,17 +142,17 @@ if '-h' in options  or '--help' in options:
 if '-V' in options or '--version' in options:
 	print("Simnigma version", version)
 
-print('-11 rotors_number-----', rotors_number)
-print('-11 rotors_name_save--', rotors_name_save)
-print('-10 key_size----------', key_size)
-print('-9 key_name_save------', key_name_save)
-print('-8 only_screen--------', only_screen)
-print('-7 show---------------', show)
-print('-6 rotors_name_load---', rotors_name_load)
-print('-5 key_name_load------', key_name_load)
-print('-4 files_to_decrypt---', files_to_decrypt)
-print('-3 files_to_encrypt---', files_to_encrypt)
-print('-2 options------------', options)
+printd('-11 rotors_number-----', rotors_number)
+printd('-11 rotors_name_save--', rotors_name_save)
+printd('-10 key_size----------', key_size)
+printd('-9 key_name_save------', key_name_save)
+printd('-8 only_screen--------', only_screen)
+printd('-7 show---------------', show)
+printd('-6 rotors_name_load---', rotors_name_load)
+printd('-5 key_name_load------', key_name_load)
+printd('-4 files_to_decrypt---', files_to_decrypt)
+printd('-3 files_to_encrypt---', files_to_encrypt)
+printd('-2 options------------', options)
 
 if len(options) > 2:
 	show_help(bcolors.WARNING + "Error: Invalid options" + bcolors.ENDC)
@@ -164,10 +164,11 @@ if '-k' in sys.argv and key_name_load == ' ':
 	show_help(bcolors.WARNING + "Error: name of key to load" + bcolors.ENDC)
 if '-r' in sys.argv and rotors_name_load == ' ':
 	show_help(bcolors.WARNING + "Error: name of rotors to load" + bcolors.ENDC)
+if '-c' in sys.argv and len(files_to_encrypt) != 1 and only_screen:
+	show_help(bcolors.WARNING + "Error: To many files to save if -s" + bcolors.ENDC)
+if '-d' in sys.argv and len(files_to_decrypt) != 1 and only_screen:
+	show_help(bcolors.WARNING + "Error: To many files to load if -s" + bcolors.ENDC)
 
-
-
-# key_in_dir = ''
 if key_name_load:
 	if key_name_load[0] == '/':
 		key = load_file_all(key_name_load, 'key', True)
@@ -185,9 +186,8 @@ else:
 			key = load_file_all(max(glob.glob("/media/**/*.key", recursive=True), key=os.path.getatime), 'key', True)
 	if (glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'))  and not key:
 		key = load_file_all(max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime), 'key', True)
+# todo sprawdzenie rotors minimalna ilość + min max in
 
-
-# rotors_in_dir = ''
 if rotors_name_load:
 	if rotors_name_load[0] == '/':
 		rotors = load_file_all(rotors_name_load, 'rotors_from_one_file', True)
@@ -205,13 +205,118 @@ else:
 			rotors = load_file_all(max(glob.glob("/media/**/*.rotors", recursive=True), key=os.path.getatime), 'rotors_from_one_file', True)
 	if (glob.glob(options[0][:options[0].rfind('/') + 1] + 'rotors/*')) and not rotors:
 		rotors = load_file_all(max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'rotors/*'), key=os.path.getatime), 'rotors_from_one_file', True)
+# todo sprawdzenie rotors minimalna ilość + min max in
+
+
+if not only_screen and files_to_encrypt:
+	for file_my in files_to_encrypt[:]:
+		if os.stat(str(os.path.abspath('') + '/' + file_my)).st_size > 0:
+			files_to_encrypt[files_to_encrypt.index(file_my)] = str(os.path.abspath('') + '/' + file_my)
+		else:
+			print(bcolors.IMPORTANT + "Warning: Empty file {}".format(file_my) + bcolors.ENDC)
+			files_to_encrypt.remove(file_my)
+	for file_my in files_to_encrypt[:]:
+		if not os.path.isfile(file_my):
+			print(bcolors.WARNING + '"{}" this isn\'t a file'.format(file_my) + bcolors.ENDC)
+			files_to_encrypt.remove(file_my)
+	for file_my in files_to_encrypt:
+		text_before = load_file_all(file_my, 'file', True)
+		text_encrypt = encrypt(rotors, key, text_before)
+		save_file_all(file_my + '.enc', text_encrypt, 'file', True)
+		if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
+		                    show_all=True, show_uni=True)
+if only_screen and files_to_encrypt:
+	print("Enter/Paste your content. Ctrl-D or Ctrl-C to save it.")
+	text_before = ''
+	while True:
+		try:
+			if text_before: text_before += '\n'
+			text_before += input('---> ')
+		except KeyboardInterrupt:
+			break
+		except EOFError:
+			break
+	text_before = convert_str_to_list(text_before)
+	text_encrypt = encrypt(rotors, key, text_before)
+	save_file_all(files_to_encrypt[0] + '.enc', text_encrypt, 'file', True)
+	if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
+	                    show_all=True, show_uni=True)
+	
+if not only_screen and files_to_decrypt:
+	for file_my in files_to_decrypt[:]:
+		if os.stat(str(os.path.abspath('') + '/' + file_my)).st_size > 0:
+			files_to_decrypt[files_to_decrypt.index(file_my)] = str(os.path.abspath('') + '/' + file_my)
+		else:
+			print(bcolors.IMPORTANT + "Warning: Empty file {}".format(file_my) + bcolors.ENDC)
+			files_to_decrypt.remove(file_my)
+	for file_my in files_to_decrypt[:]:
+		if (not os.path.isfile(file_my) or (file_my[-4:] != '.enc')):
+			print(bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my) + bcolors.ENDC)
+			files_to_decrypt.remove(file_my)
+	for file_my in files_to_decrypt:
+		text_encrypt = load_file_all(file_my, 'file', True)
+		text_decrypt = decrypt(rotors, key, text_encrypt)
+		save_file_all(file_my + '.dec', text_decrypt, 'file', True)
+		if show: test_print(rotors=rotors, key_enc=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt,
+		                    show_all=True, show_uni=True)
+if only_screen and files_to_decrypt:
+	for file_my in files_to_decrypt[:]:
+		if os.stat(str(os.path.abspath('') + '/' + file_my)).st_size > 0:
+			files_to_decrypt[files_to_decrypt.index(file_my)] = str(os.path.abspath('') + '/' + file_my)
+		else:
+			exit(bcolors.IMPORTANT + "Warning: Empty file {}".format(file_my) + bcolors.ENDC)
+	for file_my in files_to_decrypt[:]:
+		if (not os.path.isfile(file_my) or (file_my[-4:] != '.enc')):
+			exit(bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my) + bcolors.ENDC)
+	for file_my in files_to_decrypt:
+		text_encrypt = load_file_all(file_my, 'file', True)
+		text_decrypt = decrypt(rotors, key, text_encrypt)
+		# save_file_all(file_my + '.dec', text_decrypt, 'file', True)
+		if show: test_print(rotors=rotors, key_enc=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt,
+		                    show_all=True, show_uni=True)
+		text_decrypt = convert_list_to_str(text_decrypt[:-1])
+		text_decrypt = text_decrypt.split('\n')
+		for line in text_decrypt:
+			print('---> ', line)
+	
+	
+	
+			
+	
 
 
 
 
 
-exit('OK')
-# todo long_print if show print(key)
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	printd(' OK ')
+	exit()
+	
+		
+		
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -232,314 +337,314 @@ exit('OK stop')
 
 
 
-version = '5.0.0'
-options = sys.argv + [' ',]
-options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version',
-               '-s', '--silent')
-max_print_length = 110
-min_print_length = 15
-
-options_current = list(filter(lambda opt: opt in options_all , options))
-options_param = list(filter(lambda opt: opt not in options_all, options))
-options_param = options_param[1:]
-# options_param.append(' ')
-
-print(options)
-if options[1][0] != '-': show_help('na poczotku bez opcji')
-for opt in options:
-	if opt[0] == '-' and opt not in options_all:
-		show_help('opcje których nie ma w all')
-
-show = False
-if (('-v') or ('--verbose')) in options_current:
-	show = True
-	options_current.remove('-v') if ('-v') in options_current else options_current.remove('--verbose')
-
-only_screen = False
-if ('-s' or '--silent') in options_current:
-	only_screen = True
-	options_current.remove('-s') if ('-s') in options_current else options_current.remove('--silent')
-
-
-print('options_current:', options_current)
-print('options_param:', options_param)
-print('options:', options)
-while len(options_current) <= 3:
-	if '-c' in options_current and len(options_current) == 1:
-		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-': break
-	if '-d' in options_current and len(options_current) == 1:
-		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-': break
-	
-	if (all(opt in options_current for opt in ['-c', '-k'])) and len(options_current) == 2:
-		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-':
-			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
-				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ': break
-	if (all(opt in options_current for opt in ['-d', '-k'])) and len(options_current) == 2:
-		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-':
-			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
-				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ': break
-
-	if (all(opt in options_current for opt in ['-c', '-k', '-r'])) and len(options_current) == 3:
-		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-':
-			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
-				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ':
-					if options[options.index('-r') + 1] != ' ' and options[options.index('-r') + 1][0] != '-':
-						if (options[options.index('-r') + 2] in options_all) or options[options.index('-r') + 2] == ' ': break
-	if (all(opt in options_current for opt in ['-d', '-k', '-r'])) and len(options_current) == 3:
-		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-':
-			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
-				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ':
-					if options[options.index('-r') + 1] != ' ' and options[options.index('-r') + 1][0] != '-':
-						if (options[options.index('-r') + 2] in options_all) or options[options.index('-r') + 2] == ' ': break
-					
-		
-	if ('-K' in options_current and len(options_current) == 1) or ('-R' in options_current and len(options_current) == 1) or \
-			((all(opt in options_current for opt in ['-K', '-R'])) and len(options_current) == 2):
-		if '-K' in options_current and options[options.index('-K') + 1] != ' ' and options[options.index('-K') + 1][0] != '-':
-			try:
-				test = int(options[options.index('-K') + 2])
-			except:
-				show_help("nie int")
-		if '-R' in options_current and options[options.index('-R') + 1] != ' ' and options[options.index('-R') + 1][0] != '-':
-			try:
-				test = int(options[options.index('-R') + 2])
-			except:
-				show_help("nie int")
-		if '-K' in options_current and options[options.index('-K') + 3] != ' ' and options[options.index('-K') + 3] not in options_all:
-			show_help('po try -K')
-		if '-R' in options_current and options[options.index('-R') + 3] != ' ' and options[options.index('-R') + 3] not in options_all:
-			show_help('po try -R')
-		break
-	if ('-h' or '--help') in options_current and len(options_current) == 1: break
-	if ('-V' or '--Version') in options_current and len(options_current) == 1: break
-	show_help("Na koncu while")
-else:
-	show_help('Else z while')
-
-
-
-
-
-if ('-c' in options_current) or ('-d' in options_current):
-	options_param = options_param[:-1]
-	
-	key = ''
-	if '-k' in options_current:
-		options_current.remove('-k')
-		key_in_dir =''
-		# if key full path
-		if options[options.index('-k') + 1][0] == '/':
-			key_in_dir = options[options.index('-k') + 1]
-			key = load_key(key_in_dir)
-			options_param.remove(options[options.index('-k') + 1])
-		# if key path with '..'
-		elif options[options.index('-k') + 1][0:2] == '..':
-			key_in_dir = os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-k') + 1][2:]
-			key = load_key(key_in_dir)
-			options_param.remove(options[options.index('-k') + 1])
-		# if key path with './'
-		elif options[options.index('-k') + 1][0:2] == './':
-			key_in_dir = os.getcwd() + options[options.index('-k') + 1][1:]
-			key = load_key(key_in_dir)
-			options_param.remove(options[options.index('-k') + 1])
-		# if current directrory with .key
-		elif options[options.index('-k') + 1][-4:] == '.key':
-			key_in_dir = os.getcwd() + '/' + options[options.index('-k') + 1]
-			key = load_key(key_in_dir)
-			options_param.remove(options[options.index('-k') + 1])
-		# if key only name
-		else:
-			key_in_dir = options[0][:options[0].rfind('/')] + '/keys/' + options[options.index('-k') + 1]
-			options_param.remove(options[options.index('-k') + 1])
-			key = load_key(key_in_dir)
-		print('Loaded key:   ', key_in_dir)
-	# if no -k then latest
-	else:
-		last_key_in_dir = max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime)
-		key = load_key(last_key_in_dir)
-		print('Loaded key:   ', last_key_in_dir)
-	
-	rotors = []
-	name_of_rotors_in_dir = ''
-	last_rotors_in_dir = ''
-	if '-r' in options_current:
-		options_current.remove('-r')
-		# if rotor full path
-		if options[options.index('-r') + 1][0] == '/':
-			name_of_rotors_in_dir = options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
-			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
-			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)#, number_of_rotors)
-			while (options[options.index('-r') + 1]) in options_param:
-				options_param.remove(options[options.index('-r') + 1])
-		# if rotor path with '..'
-		elif options[options.index('-r') + 1][0:2] == '..':
-			name_of_rotors_in_dir = os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-r') + 1][
-			                                                               2:options[options.index('-r') + 1].rfind('_')]
-			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
-			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
-			while (options[options.index('-r') + 1]) in options_param:
-				options_param.remove(options[options.index('-r') + 1])
-		# if rotor path with './'
-		elif options[options.index('-r') + 1][0:2] == './':
-			name_of_rotors_in_dir = os.getcwd() + '/' + options[options.index('-r') + 1][2:options[options.index('-r') + 1].rfind('_')]
-			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
-			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
-			while (options[options.index('-r') + 1]) in options_param:
-				options_param.remove(options[options.index('-r') + 1])
-		# if current directrory with .rot
-		elif options[options.index('-r') + 1][-7:] == '.rotors':
-			name_of_rotors_in_dir = os.getcwd() + '/' + options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
-			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
-			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
-			while (options[options.index('-r') + 1]) in options_param:
-				options_param.remove(options[options.index('-r') + 1])
-		# if only name
-		else:
-			name_of_rotors_in_dir = options[0][0:options[0].rfind('/')] + '/rotors/' + options[options.index('-r') + 1]
-			# number_of_rotors = len(glob.glob(options[0][0:options[0].rfind('/')] + '/rotors/' + options[options.index('-r') + 1] + '*'))
-			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
-			
-			while (options[options.index('-r') + 1]) in options_param:
-				options_param.remove(options[options.index('-r') + 1])
-	# if no -r then latest
-	else:
-		last_rotors_in_dir = max(glob.glob(options[0][:options[0].rfind('/')] + '/rotors/*'), key = os.path.getatime)[:max(glob.glob(options[0][:options[0].rfind('/')] + '/rotors/*'), key = os.path.getatime).rfind('.')]
-		rotors = load_rotors_from_one_file(last_rotors_in_dir)
-	if name_of_rotors_in_dir: print('Loaded rotors:', name_of_rotors_in_dir)
-	if last_rotors_in_dir: print('Loaded rotors:', last_rotors_in_dir)
+# version = '5.0.0'
+# options = sys.argv + [' ',]
+# options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version',
+#                '-s', '--silent')
+# max_print_length = 110
+# min_print_length = 15
+#
+# options_current = list(filter(lambda opt: opt in options_all , options))
+# options_param = list(filter(lambda opt: opt not in options_all, options))
+# options_param = options_param[1:]
+# # options_param.append(' ')
+#
+# print(options)
+# if options[1][0] != '-': show_help('na poczotku bez opcji')
+# for opt in options:
+# 	if opt[0] == '-' and opt not in options_all:
+# 		show_help('opcje których nie ma w all')
+#
+# show = False
+# if (('-v') or ('--verbose')) in options_current:
+# 	show = True
+# 	options_current.remove('-v') if ('-v') in options_current else options_current.remove('--verbose')
+#
+# only_screen = False
+# if ('-s' or '--silent') in options_current:
+# 	only_screen = True
+# 	options_current.remove('-s') if ('-s') in options_current else options_current.remove('--silent')
+#
+#
+# print('options_current:', options_current)
+# print('options_param:', options_param)
+# print('options:', options)
+# while len(options_current) <= 3:
+# 	if '-c' in options_current and len(options_current) == 1:
+# 		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-': break
+# 	if '-d' in options_current and len(options_current) == 1:
+# 		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-': break
+#
+# 	if (all(opt in options_current for opt in ['-c', '-k'])) and len(options_current) == 2:
+# 		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-':
+# 			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+# 				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ': break
+# 	if (all(opt in options_current for opt in ['-d', '-k'])) and len(options_current) == 2:
+# 		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-':
+# 			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+# 				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ': break
+#
+# 	if (all(opt in options_current for opt in ['-c', '-k', '-r'])) and len(options_current) == 3:
+# 		if options[options.index('-c') + 1] != ' ' and options[options.index('-c') + 1][0] != '-':
+# 			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+# 				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ':
+# 					if options[options.index('-r') + 1] != ' ' and options[options.index('-r') + 1][0] != '-':
+# 						if (options[options.index('-r') + 2] in options_all) or options[options.index('-r') + 2] == ' ': break
+# 	if (all(opt in options_current for opt in ['-d', '-k', '-r'])) and len(options_current) == 3:
+# 		if options[options.index('-d') + 1] != ' ' and options[options.index('-d') + 1][0] != '-':
+# 			if options[options.index('-k') + 1] != ' ' and options[options.index('-k') + 1][0] != '-':
+# 				if (options[options.index('-k') + 2] in options_all) or options[options.index('-k') + 2] == ' ':
+# 					if options[options.index('-r') + 1] != ' ' and options[options.index('-r') + 1][0] != '-':
+# 						if (options[options.index('-r') + 2] in options_all) or options[options.index('-r') + 2] == ' ': break
+#
+#
+# 	if ('-K' in options_current and len(options_current) == 1) or ('-R' in options_current and len(options_current) == 1) or \
+# 			((all(opt in options_current for opt in ['-K', '-R'])) and len(options_current) == 2):
+# 		if '-K' in options_current and options[options.index('-K') + 1] != ' ' and options[options.index('-K') + 1][0] != '-':
+# 			try:
+# 				test = int(options[options.index('-K') + 2])
+# 			except:
+# 				show_help("nie int")
+# 		if '-R' in options_current and options[options.index('-R') + 1] != ' ' and options[options.index('-R') + 1][0] != '-':
+# 			try:
+# 				test = int(options[options.index('-R') + 2])
+# 			except:
+# 				show_help("nie int")
+# 		if '-K' in options_current and options[options.index('-K') + 3] != ' ' and options[options.index('-K') + 3] not in options_all:
+# 			show_help('po try -K')
+# 		if '-R' in options_current and options[options.index('-R') + 3] != ' ' and options[options.index('-R') + 3] not in options_all:
+# 			show_help('po try -R')
+# 		break
+# 	if ('-h' or '--help') in options_current and len(options_current) == 1: break
+# 	if ('-V' or '--Version') in options_current and len(options_current) == 1: break
+# 	show_help("Na koncu while")
+# else:
+# 	show_help('Else z while')
+#
+#
+#
+#
+#
+# if ('-c' in options_current) or ('-d' in options_current):
+# 	options_param = options_param[:-1]
+#
+# 	key = ''
+# 	if '-k' in options_current:
+# 		options_current.remove('-k')
+# 		key_in_dir =''
+# 		# if key full path
+# 		if options[options.index('-k') + 1][0] == '/':
+# 			key_in_dir = options[options.index('-k') + 1]
+# 			key = load_key(key_in_dir)
+# 			options_param.remove(options[options.index('-k') + 1])
+# 		# if key path with '..'
+# 		elif options[options.index('-k') + 1][0:2] == '..':
+# 			key_in_dir = os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-k') + 1][2:]
+# 			key = load_key(key_in_dir)
+# 			options_param.remove(options[options.index('-k') + 1])
+# 		# if key path with './'
+# 		elif options[options.index('-k') + 1][0:2] == './':
+# 			key_in_dir = os.getcwd() + options[options.index('-k') + 1][1:]
+# 			key = load_key(key_in_dir)
+# 			options_param.remove(options[options.index('-k') + 1])
+# 		# if current directrory with .key
+# 		elif options[options.index('-k') + 1][-4:] == '.key':
+# 			key_in_dir = os.getcwd() + '/' + options[options.index('-k') + 1]
+# 			key = load_key(key_in_dir)
+# 			options_param.remove(options[options.index('-k') + 1])
+# 		# if key only name
+# 		else:
+# 			key_in_dir = options[0][:options[0].rfind('/')] + '/keys/' + options[options.index('-k') + 1]
+# 			options_param.remove(options[options.index('-k') + 1])
+# 			key = load_key(key_in_dir)
+# 		print('Loaded key:   ', key_in_dir)
+# 	# if no -k then latest
+# 	else:
+# 		last_key_in_dir = max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime)
+# 		key = load_key(last_key_in_dir)
+# 		print('Loaded key:   ', last_key_in_dir)
+#
+# 	rotors = []
+# 	name_of_rotors_in_dir = ''
+# 	last_rotors_in_dir = ''
+# 	if '-r' in options_current:
+# 		options_current.remove('-r')
+# 		# if rotor full path
+# 		if options[options.index('-r') + 1][0] == '/':
+# 			name_of_rotors_in_dir = options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
+# 			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+# 			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)#, number_of_rotors)
+# 			while (options[options.index('-r') + 1]) in options_param:
+# 				options_param.remove(options[options.index('-r') + 1])
+# 		# if rotor path with '..'
+# 		elif options[options.index('-r') + 1][0:2] == '..':
+# 			name_of_rotors_in_dir = os.getcwd()[:os.getcwd().rfind('/')] + options[options.index('-r') + 1][
+# 			                                                               2:options[options.index('-r') + 1].rfind('_')]
+# 			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+# 			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
+# 			while (options[options.index('-r') + 1]) in options_param:
+# 				options_param.remove(options[options.index('-r') + 1])
+# 		# if rotor path with './'
+# 		elif options[options.index('-r') + 1][0:2] == './':
+# 			name_of_rotors_in_dir = os.getcwd() + '/' + options[options.index('-r') + 1][2:options[options.index('-r') + 1].rfind('_')]
+# 			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+# 			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
+# 			while (options[options.index('-r') + 1]) in options_param:
+# 				options_param.remove(options[options.index('-r') + 1])
+# 		# if current directrory with .rot
+# 		elif options[options.index('-r') + 1][-7:] == '.rotors':
+# 			name_of_rotors_in_dir = os.getcwd() + '/' + options[options.index('-r') + 1][:options[options.index('-r') + 1].rfind('_')]
+# 			# number_of_rotors = len(glob.glob(name_of_rotors_in_dir + '*'))
+# 			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
+# 			while (options[options.index('-r') + 1]) in options_param:
+# 				options_param.remove(options[options.index('-r') + 1])
+# 		# if only name
+# 		else:
+# 			name_of_rotors_in_dir = options[0][0:options[0].rfind('/')] + '/rotors/' + options[options.index('-r') + 1]
+# 			# number_of_rotors = len(glob.glob(options[0][0:options[0].rfind('/')] + '/rotors/' + options[options.index('-r') + 1] + '*'))
+# 			rotors = load_rotors_from_one_file(name_of_rotors_in_dir)  # , number_of_rotors)
+#
+# 			while (options[options.index('-r') + 1]) in options_param:
+# 				options_param.remove(options[options.index('-r') + 1])
+# 	# if no -r then latest
+# 	else:
+# 		last_rotors_in_dir = max(glob.glob(options[0][:options[0].rfind('/')] + '/rotors/*'), key = os.path.getatime)[:max(glob.glob(options[0][:options[0].rfind('/')] + '/rotors/*'), key = os.path.getatime).rfind('.')]
+# 		rotors = load_rotors_from_one_file(last_rotors_in_dir)
+# 	if name_of_rotors_in_dir: print('Loaded rotors:', name_of_rotors_in_dir)
+# 	if last_rotors_in_dir: print('Loaded rotors:', last_rotors_in_dir)
 	
 	# exit('klucz i rotorsy loaded')
 	
-	files_to_crypt = []
-	number_of_files = 0
-	if not only_screen:
-		for file_my in options_param[:]: # todo sprawdź from -c do next in options_all
-			if os.path.isfile(file_my):
-				files_to_crypt.append(os.path.abspath('') + '/' + file_my)
-				options_param.pop(options_param.index(file_my))
-			elif os.path.isdir(file_my):
-				options_param.pop(options_param.index(file_my))
-			else:
-				print(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a file'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
-		
-		if '-c' in options_current:
-			options_current.remove('-c')
-			if options_current:
-				show_help()
-				print('----176')
-			for file in files_to_crypt:
-				text_before = load_file(file)
-				if(text_before) == []:
-					continue
-				print('Encrypt file: ', file)
-				text_encrypt = encrypt(rotors, key, text_before)
-				save_file(file + ".enc", text_encrypt)
-				if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt, show_all=True, show_uni=True)
-	
-	if ('-c' in options_current and only_screen):
-		options_current.remove('-c')
-		if options_current:
-			show_help()
-			print('----176')
-		text_before = []
-		print("Enter/Paste your content. Ctrl-D or Ctrl-C to save it.")
-		while True:
-			try:
-				if text_before: text_before += '\n'
-				text_before += input('>>> ')
-			except KeyboardInterrupt:
-				break
-			except EOFError:
-				break
-		text_before = convert_str_to_list(text_before)
-		text_encrypt = encrypt(rotors, key, text_before)
-		file_my = options[options.index('-c') + 1]
-		save_file(file_my + ".enc", text_encrypt)
-		if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
-		                    show_all=True, show_uni=True)
+	# files_to_crypt = []
+	# number_of_files = 0
+	# if not only_screen:
+	# 	for file_my in options_param[:]: # todo sprawdź from -c do next in options_all
+	# 		if os.path.isfile(file_my):
+	# 			files_to_crypt.append(os.path.abspath('') + '/' + file_my)
+	# 			options_param.pop(options_param.index(file_my))
+	# 		elif os.path.isdir(file_my):
+	# 			options_param.pop(options_param.index(file_my))
+	# 		else:
+	# 			print(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a file'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
+	#
+	# 	if '-c' in options_current:
+	# 		options_current.remove('-c')
+	# 		if options_current:
+	# 			show_help()
+	# 			print('----176')
+	# 		for file in files_to_crypt:
+	# 			text_before = load_file(file)
+	# 			if(text_before) == []:
+	# 				continue
+	# 			print('Encrypt file: ', file)
+	# 			text_encrypt = encrypt(rotors, key, text_before)
+	# 			save_file(file + ".enc", text_encrypt)
+	# 			if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt, show_all=True, show_uni=True)
+	#
+	# if ('-c' in options_current and only_screen):
+	# 	options_current.remove('-c')
+	# 	if options_current:
+	# 		show_help()
+	# 		print('----176')
+	# 	text_before = []
+	# 	print("Enter/Paste your content. Ctrl-D or Ctrl-C to save it.")
+	# 	while True:
+	# 		try:
+	# 			if text_before: text_before += '\n'
+	# 			text_before += input('>>> ')
+	# 		except KeyboardInterrupt:
+	# 			break
+	# 		except EOFError:
+	# 			break
+	# 	text_before = convert_str_to_list(text_before)
+	# 	text_encrypt = encrypt(rotors, key, text_before)
+	# 	file_my = options[options.index('-c') + 1]
+	# 	save_file(file_my + ".enc", text_encrypt)
+	# 	if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
+	# 	                    show_all=True, show_uni=True)
 	
 	
 	
 	
 	# def test_print(rotors, key_enc=[], key_dec=[], text_before=[], text_encrypt=[], text_decrypt=[],
 	#                show_all=False, show_first=False, show_short=False, show_calc=False, show_uni=False):
-	
-	if '-d' in options_current and not only_screen:
-		options_current.remove('-d')
-		if options_current:
-			show_help()
-			print('----194')
-		for file_my in files_to_crypt:
-			if file_my[-4:] != '.enc':
-				print(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
-				continue
-			text_encrypt = load_file(file_my)
-			if(text_encrypt) == []:
-				continue
-			print('Decrypt file: ', file_my)
-			text_decrypt = decrypt(rotors, key, text_encrypt)
-			save_file(file_my + ".dec", text_decrypt)
-			if show: test_print(rotors=rotors, key_dec=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt, show_all=True, show_uni=True)
-	
-	if '-d' in options_current and only_screen:
-		options_current.remove('-d')
-		if options_current:
-			show_help()
-			print('----194')
-		file_my = options[options.index('-d') + 1]
-		if file_my[-4:] != '.enc':
-			exit(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(
-				file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
-		text_encrypt = load_file(file_my)
-		if (text_encrypt) == []:
-			exit(bcolors.BOLD + bcolors.WARNING + 'File "{}" is empty'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
-		print('Decrypt file: ', file_my)
-		text_decrypt = decrypt(rotors, key, text_encrypt)
-		text_decrypt = convert_list_to_str(text_decrypt[:-1])
-		text_decrypt = text_decrypt.split('\n')
-		for line in text_decrypt:
-			print('>>>', line)
-
-	
-elif ('-R' in options_current) or ('-K' in options_current):
-	if ('-K' in options_current):
-		name_of_key = options[0][:options[0].rfind('/')] + '/keys/' + options[options.index('-K') + 1]
-		key_size = 	options[options.index('-K') + 2]
-		options_current.remove('-K')
-		options_param.remove(options[options.index('-K') + 1])
-		options_param.remove(options[options.index('-K') + 2])
-		# if options_current:
-		# 	show_help('----217')
-		key = create_random_64b_key(int(key_size))
-		save_key(name_of_key, key)
-		print('Key created:    ', name_of_key + '.key')
-		if show: print_long("Key", '[' + key + ']', min_print_length, max_print_length, True)
-	if ('-R' in options_current):
-		options_current.remove('-R')
-		name_of_rotors_in_dir = options[options.index('-R') + 1]
-		options_param.remove(name_of_rotors_in_dir)
-		number_of_rotors = int(options[options.index('-R') + 2])
-		options_param.remove(str(number_of_rotors))
-		# if options_current:
-		# 	show_help()
-		# 	print('----230')
-		rotors = create_rotors(8, True, number_of_rotors)
-		name_of_rotors_in_dir = options[0][:options[0].rfind('/')] + '/rotors/' + name_of_rotors_in_dir
-		save_rotors_in_one_file(rotors, name_of_rotors_in_dir)
-		print('Rotors created:  {}'.format(name_of_rotors_in_dir + '.rotors'))
-		# for r in range(1, number_of_rotors + 1):
-		# 	print('Rotor {} created:'.format(r), name_of_rotors_in_dir + '_' + str(r) + '.rot')
-		if show: print_long("Rotor", rotors, min_print_length, max_print_length, False)
-
-elif ('-t' in options_current) or ('--tests' in options_current):
-	pass
-elif ('-h' in options_current) or ('--help' in options_current):
-	show_help()
-elif ('-V' in options_current) or ('--version' in options_current):
-	print("Enigma version", version)
-else:
-	show_help()
-	print('----na koncu')
+# todo to jeszcze zostało
+# 	if '-d' in options_current and not only_screen:
+# 		options_current.remove('-d')
+# 		if options_current:
+# 			show_help()
+# 			print('----194')
+# 		for file_my in files_to_crypt:
+# 			if file_my[-4:] != '.enc':
+# 				print(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
+# 				continue
+# 			text_encrypt = load_file(file_my)
+# 			if(text_encrypt) == []:
+# 				continue
+# 			print('Decrypt file: ', file_my)
+# 			text_decrypt = decrypt(rotors, key, text_encrypt)
+# 			save_file(file_my + ".dec", text_decrypt)
+# 			if show: test_print(rotors=rotors, key_dec=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt, show_all=True, show_uni=True)
+#
+# 	if '-d' in options_current and only_screen:
+# 		options_current.remove('-d')
+# 		if options_current:
+# 			show_help()
+# 			print('----194')
+# 		file_my = options[options.index('-d') + 1]
+# 		if file_my[-4:] != '.enc':
+# 			exit(bcolors.BOLD + bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(
+# 				file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
+# 		text_encrypt = load_file(file_my)
+# 		if (text_encrypt) == []:
+# 			exit(bcolors.BOLD + bcolors.WARNING + 'File "{}" is empty'.format(file_my[file_my.rfind('/') + 1:]) + bcolors.ENDC)
+# 		print('Decrypt file: ', file_my)
+# 		text_decrypt = decrypt(rotors, key, text_encrypt)
+# 		text_decrypt = convert_list_to_str(text_decrypt[:-1])
+# 		text_decrypt = text_decrypt.split('\n')
+# 		for line in text_decrypt:
+# 			print('>>>', line)
+#
+#
+# elif ('-R' in options_current) or ('-K' in options_current):
+# 	if ('-K' in options_current):
+# 		name_of_key = options[0][:options[0].rfind('/')] + '/keys/' + options[options.index('-K') + 1]
+# 		key_size = 	options[options.index('-K') + 2]
+# 		options_current.remove('-K')
+# 		options_param.remove(options[options.index('-K') + 1])
+# 		options_param.remove(options[options.index('-K') + 2])
+# 		# if options_current:
+# 		# 	show_help('----217')
+# 		key = create_random_64b_key(int(key_size))
+# 		save_key(name_of_key, key)
+# 		print('Key created:    ', name_of_key + '.key')
+# 		if show: print_long("Key", '[' + key + ']', min_print_length, max_print_length, True)
+# 	if ('-R' in options_current):
+# 		options_current.remove('-R')
+# 		name_of_rotors_in_dir = options[options.index('-R') + 1]
+# 		options_param.remove(name_of_rotors_in_dir)
+# 		number_of_rotors = int(options[options.index('-R') + 2])
+# 		options_param.remove(str(number_of_rotors))
+# 		# if options_current:
+# 		# 	show_help()
+# 		# 	print('----230')
+# 		rotors = create_rotors(8, True, number_of_rotors)
+# 		name_of_rotors_in_dir = options[0][:options[0].rfind('/')] + '/rotors/' + name_of_rotors_in_dir
+# 		save_rotors_in_one_file(rotors, name_of_rotors_in_dir)
+# 		print('Rotors created:  {}'.format(name_of_rotors_in_dir + '.rotors'))
+# 		# for r in range(1, number_of_rotors + 1):
+# 		# 	print('Rotor {} created:'.format(r), name_of_rotors_in_dir + '_' + str(r) + '.rot')
+# 		if show: print_long("Rotor", rotors, min_print_length, max_print_length, False)
+#
+# elif ('-t' in options_current) or ('--tests' in options_current):
+# 	pass
+# elif ('-h' in options_current) or ('--help' in options_current):
+# 	show_help()
+# elif ('-V' in options_current) or ('--version' in options_current):
+# 	print("Enigma version", version)
+# else:
+# 	show_help()
+# 	print('----na koncu')
 
 
 # todo ---------- this part is our playground :)----------

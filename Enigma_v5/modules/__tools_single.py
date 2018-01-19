@@ -4,10 +4,15 @@
 from random import shuffle, randint
 import pickle
 
+
+
 class bcolors:
 	WARNING = '\033[91m'
 	BOLD = '\033[1m'
-	ORANGE = '\x1b[1;33;40m'
+	ORANGE = '\033[1;33;40m'
+	YELLOW = '\033[33m'
+	INYELLOW = '\033[3;33;38m'
+	IMPORTANT = '\033[1;33;59m'
 	ENDC = '\033[0m'
 
 def __cre_rotor(size_in_max, mix):
