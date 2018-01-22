@@ -739,7 +739,7 @@ def convert_list_to_str(text_before):
 	return text_in_str
 
 
-def show_help(message):
+def show_help(message=''):
 	print("""
 Simple programme for encrypts and decrypts files.
 Usage:      enigma5 -c [file of files, you can use reg.]
@@ -778,7 +778,8 @@ Examples:   simnigma.py -K your_key_name 2048
                 And last you can decrypt file or files, remember that you must use the same rotors and keys as
                  you use to encrypt, what is logically
 	""")
-	exit(bcolors.WARNING + 'Error: ' + message + bcolors.ENDC)
+	if message: exit(bcolors.WARNING + 'Error: ' + message + bcolors.ENDC)
+	else: exit()
 
 
 def printd(*argss, debug=False, max_print_length = 100):

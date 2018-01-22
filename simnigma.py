@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 
 
-# todo dorób obsługę wyjątków
+# todo czas pozostały do zaszyfrowania odszyfrowania
 # todo przenieś z generatorów kluczy funkcje zmieniaja ce 64b na DEC itp do __Tools_single
-# todo simnigma
 # todo dorób rekurenje do wychodzenia w katalogu ponad ../
 # todo zrób mozliwość szyfrowania ponad 8b rotors https://docs.python.org/2/library/struct.html
 # todo zrób to na https://stormpath.com/blog/building-simple-cli-interfaces-in-python
@@ -18,6 +17,8 @@
 # todo komentarze
 # todo dlaczego jeśli podaję do metody listę def bleble(self, cos_tam)
 # todo      to nie mogę pracować na coś tam i jej zwrucić ?
+# simnigma
+# obsługę wyjątków
 # rotors rozzezenie na rot zroó” !!
 # rotors w 1 pliku
 # print_all true or false
@@ -32,29 +33,16 @@
 # print only 2 decimals
 # how to division with out decimal
 # drums ---> rotors drum ---> drum
-import inspect
+
 import sys
 import os
 import glob
 
+from modules.__tools_single import bcolors
 from modules.tools import encrypt, decrypt, create_random_64b_key, print_long, show_help, \
 	convert_str_to_list, convert_list_to_str, load_file_all, save_file_all, printd, create_rotors,\
 	check_rand_rotors, check_64b_key
-
-
 from modules.test_print import test_print
-from modules.__tools_single import bcolors
-
-# rotors = create_rotors(12, True, 6)
-# save_file_all('for_file_bad', rotors, 'rotors_in_one_file', show=True)
-# exit()
-# key = create_random_64b_key(9)
-# print(type(key))
-# key += '?'
-# save_file_all('for_file_bad', key, 'key', show=True)
-# exit()
-
-
 
 
 
@@ -64,7 +52,10 @@ options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--t
                '-s', '--silent')
 max_print_length = 110
 min_print_length = 15
-
+max_print_length = 120
+min_print_length = 15
+space = 45
+debug = False
 
 files_to_encrypt = []
 files_to_decrypt = []
@@ -78,11 +69,6 @@ show = False
 only_screen = False
 key = ''
 rotors = []
-max_print_length = 120
-min_print_length = 15
-space = 45
-debug = False
-
 
 printd( options, debug=debug)
 if '-c' in options:
@@ -149,10 +135,11 @@ if '-R' in options:
 	options.remove('-R')
 
 if '-h' in options  or '--help' in options:
-	pass
+	show_help('')
 
 if '-V' in options or '--version' in options:
 	print("Simnigma version", version)
+	exit()
 
 
 printd( options, files_to_encrypt, files_to_decrypt, key_name_load, key_name_save, key_size,  rotors_name_load, rotors_name_save, rotors_number, only_screen, show, debug=debug)
@@ -329,6 +316,7 @@ if key_name_save:
 if rotors_name_save:
 	printd(rotors_name_save, rotors_number, debug=debug)
 	rotors = create_rotors(8, True, rotors_number)
+	if show: print_long('Rotor', rotors, min=min_print_length, max=max_print_length)
 	print('Rotors created:', rotors_name_save, str(rotors_number) + " items")
 	rotors_name_save = options[0][:options[0].rfind('/')] + '/rotors/' + rotors_name_save
 	save_file_all(rotors_name_save, rotors, 'rotors_in_one_file', show=True)
@@ -336,7 +324,7 @@ if rotors_name_save:
 	
 
 	
-printd(' OK ')
+
 exit()
 	
 
