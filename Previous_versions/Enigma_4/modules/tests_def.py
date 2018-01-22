@@ -1,8 +1,8 @@
 # only functions to generate tools for ten drums tests encrypts
 
-from Enigma_all.Enigma_4.modules.tools import (create_drums, create_and_save_dicts, load_drums,
+from Simnigma_all.Enigma_4.modules.tools import (create_drums, create_and_save_dicts, load_drums,
                                                  check_rand_dicts)
-from Enigma_all.Enigma_4.modules.__tools_single import gen_text
+from Simnigma_all.Enigma_4.modules.__tools_single import gen_text
 
 drums_bit = 8
 debug = True # todo przenieś to głównego ???

@@ -1,8 +1,8 @@
 import decimal
 from math import log
 
-from Enigma_all.Enigma_4.modules.__tools_single import bcolors
-from Enigma_all.Enigma_4.modules.tools import check_text_const, check_rand_drums
+from Simnigma_all.Enigma_4.modules.__tools_single import bcolors
+from Simnigma_all.Enigma_4.modules.tools import check_text_const, check_rand_drums
 
 
 # todo uporadkuj nazwy

@@ -1,5 +1,8 @@
 # only functions to generate, load, save, check itp..
+# todo najpierw wszystkie load save create check generate
+
 import decimal
+import inspect
 import time
 from random import randint
 
@@ -19,86 +22,80 @@ from .core import EncryptNextRotor, EncryptSet, DecryptNextRotor, DecryptSet
 def create_rotors(size_in_bit, mix, number_of_rotors): # todo daj mix Tru i na koncu
 	size = 2 ** size_in_bit
 	return ([__cre_rotor(size, mix) for _ in range(0, number_of_rotors)])
-	
 
 
 
-
-	
-def save_rotors(rotors, name):
-	i = 1
-	for rotor in rotors:
-		__save_rotor(rotor, name + '_' + str(i))
-		i += 1
-	
-		
-def load_rotors(name, number):
-	return ([__load_rotor(x) for x in (name + '_' + str(x) for x in range(1, number + 1))])
-	
-
-def save_rotors_in_one_file(rotors, name):
-	name += ".rotors" if ".rotors" not in name[-7:] else ""
-	with open(name, 'wb') as f:
-		pickle.dump(rotors, f, pickle.HIGHEST_PROTOCOL)
-
-
-def load_rotors_from_one_file(name):
-	name += ".rotors" if ".rotors" not in name[-7:] else ""
-	with open(name, 'rb') as f:
-		return pickle.load(f)
-
-
-def save_key(name, key):
-	name += ".key" if ".key" not in name[-4:] else ""
-	f = open(name, "wb")
-	try:
-		f.write(bytes(key + "\n", 'ascii'))
-	finally:
-		f.close()
-
-
-def load_key(name, show=False):
-	name += ".key" if ".key" not in name[-4:] else ""
-	# f = open(name, "rb")
-	# try:
-	# 	key_list = f.read()
-	# finally:
-	# 	f.close()
-	try:
-		f = open(name, 'rb')
-		key_list = f.read()
-		print('Loaded key:   ', name)
-		f.close()
-	except:
-		exit(bcolors.WARNING +  "Error: Can't open key file {}".format(name) + bcolors.ENDC)
-	
-	
-	
-	key = ""
-	key_ret = ""
-	for c in key_list:
-		key += chr(c)
-	key_ret = key_ret.join(key)
-	return key_ret[:-1]
-	
-	
-def save_file(name, file):
-	f = open(name, "wb")
-	file.append(10)
-	try:
-		f.write(bytes(file))
-	finally:
-		f.close()
-	
-	
-def load_file(name):
-	f = open(name, "rb")
-	try:
-		file = f.read()
-	finally:
-		f.close()
-	file = list(file)
-	return file[:-1]
+# 		__save_rotor(rotor, name + '_' + str(i))
+# 		i += 1
+#
+#
+# def load_rotors(name, number):
+# 	return ([__load_rotor(x) for x in (name + '_' + str(x) for x in range(1, number + 1))])
+#
+#
+# def save_rotors_in_one_file(rotors, name):
+# 	name += ".rotors" if ".rotors" not in name[-7:] else ""
+# 	with open(name, 'wb') as f:
+# 		pickle.dump(rotors, f, pickle.HIGHEST_PROTOCOL)
+#
+#
+# def load_rotors_from_one_file(name):
+# 	name += ".rotors" if ".rotors" not in name[-7:] else ""
+# 	with open(name, 'rb') as f:
+# 		return pickle.load(f)
+#
+#
+# def save_key(name, key):
+# 	name += ".key" if ".key" not in name[-4:] else ""
+# 	f = open(name, "wb")
+# 	try:
+# 		f.write(bytes(key + "\n", 'ascii'))
+# 	finally:
+# 		f.close()
+#
+#
+# def load_key(name, show=False):
+# 	name += ".key" if ".key" not in name[-4:] else ""
+# 	# f = open(name, "rb")
+# 	# try:
+# 	# 	key_list = f.read()
+# 	# finally:
+# 	# 	f.close()
+# 	try:
+# 		f = open(name, 'rb')
+# 		key_list = f.read()
+# 		print('Loaded key:   ', name)
+# 		f.close()
+# 	except:
+# 		exit(bcolors.WARNING +  "Error: Can't open key file {}".format(name) + bcolors.ENDC)
+#
+#
+#
+# 	key = ""
+# 	key_ret = ""
+# 	for c in key_list:
+# 		key += chr(c)
+# 	key_ret = key_ret.join(key)
+# 	return key_ret[:-1]
+#
+#
+# def save_file(name, file):
+# 	f = open(name, "wb")
+# 	file.append(10)
+# 	try:
+# 		f.write(bytes(file))
+# 	finally:
+# 		f.close()
+#
+#
+# def load_file(name):
+# 	f = open(name, "rb")
+# 	try:
+# 		file = f.read()
+# 	finally:
+# 		f.close()
+# 	file = list(file)
+# 	return file[:-1]
 
 
 
@@ -152,7 +149,7 @@ def load_file_all(name, what_load = '', show = False, number = 0):
 	
 
 
-def save_file_all(name, obj, what_save = '', show = False, number = 0):
+def save_file_all(name, obj, what_save = '', show = False):
 	
 	if what_save == 'key':
 		name += ".key" if ".key" not in name[-4:] else ""
@@ -160,7 +157,7 @@ def save_file_all(name, obj, what_save = '', show = False, number = 0):
 		try:
 			f.write(bytes(obj + "\n", 'ascii'))
 			f.close()
-			if show == True: print('Saved key:   ', name)
+			if show == True: print('Saved key:     ', name)
 		except:
 			exit(bcolors.WARNING + "Error: Can't save key file {}".format(name) + bcolors.ENDC)
 
@@ -170,7 +167,7 @@ def save_file_all(name, obj, what_save = '', show = False, number = 0):
 			f = open(name, 'wb')
 			pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 			f.close()
-			if show == True: print('Saved rotors:', name)
+			if show == True: print('Saved rotors: ', name)
 		except:
 			exit(bcolors.WARNING + "Error: Can't save rotors file {}".format(name) + bcolors.ENDC)
 
@@ -185,7 +182,7 @@ def save_file_all(name, obj, what_save = '', show = False, number = 0):
 			f = open(name, "wb")
 			f.write(bytes(obj))
 			f.close()
-			if show == True:  print('Saved file:  ', name)
+			if show == True:  print('Saved file:   ', name)
 		except:
 			exit(bcolors.WARNING + "Error: Can't save file {}".format(name) + bcolors.ENDC)
 
@@ -208,14 +205,13 @@ def check_rand_rotors(rotors):
 		if __key_min != min(rotor) or __key_max != max(rotor) or __len != len(rotor) or __random != __check_rand_rotor(rotor)\
 				or __value_min != min(rotor.values()) or __value_max != max(rotor.values()):
 			return False, __random
+	# for rotor in rotors:
+	# 	if __key_min != min(rotor)
 	return True, __random
 
 
-def printd(*argss):
-	messages = ''
-	for arg in argss:
-		messages += str(arg)
-	print(bcolors.INYELLOW + 'D ---> ' + messages + bcolors.ENDC)
+number_of_printd = 0
+
 
 def print_format_table():
     """
@@ -498,6 +494,24 @@ def key_from_64b_to_dec(key_my):
 	return number_in_32b
 
 
+def check_64b_key(key_my):
+	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
+	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
+	             "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "q": 26, "r": 27, "s": 28, "t": 29, "u": 30,
+	             "v": 31, "w": 32, "x": 33, "y": 34, "z": 35, "A": 36, "B": 37, "C": 38, "D": 39, "E": 40,
+	             "F": 41, "G": 42, "H": 43, "I": 44, "J": 45, "K": 46, "L": 47, "M": 48, "N": 49, "O": 50,
+	             "P": 51, "Q": 52, "R": 53, "S": 54, "T": 55, "U": 56, "V": 57, "W": 58, "X": 59, "Y": 60,
+	             "Z": 61, "+": 62, "/": 63}
+	
+	for k in key_my:
+		if k in dic_64b_1:
+			continue
+		else:
+			return False
+	return True
+	
+
+
 # def __generate_inter_key(key, rotors, show=False):
 # 	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
 # 	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
@@ -560,7 +574,7 @@ def key_from_64b_to_dec(key_my):
 
 
 #
-def create_random_64b_key(size_in_bit = 2, rotors = [], show = False): #todo usuń rotors !!!
+def create_random_64b_key(size_in_bit = 2, rotors = [], max_print_length = 110, show = False): #todo usuń rotors !!!
 	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
 	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
 	             "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "q": 26, "r": 27, "s": 28, "t": 29, "u": 30,
@@ -573,14 +587,16 @@ def create_random_64b_key(size_in_bit = 2, rotors = [], show = False): #todo usu
 	for inter_key, value in dic_64b_1.items():
 		dic_64b_2[value] = inter_key
 	
+	
+	
 	# Random number in DEC
 	rand_num_in_DEC = randint(2 ** size_in_bit, (2 ** (size_in_bit + 1)) - 1)
 	if show:
 		print("Size of the number in bit: ", int(log(rand_num_in_DEC, 2)))
 		print("Random number in DEC: ")
-		for i in range(0, len(str(rand_num_in_DEC)) + 60, 60):
-			if str(rand_num_in_DEC)[i: 60 + i]:
-				print(str(rand_num_in_DEC)[i: 60 + i])
+		for i in range(0, len(str(rand_num_in_DEC)) + max_print_length, max_print_length):
+			if str(rand_num_in_DEC)[i: max_print_length + i]:
+				print(str(rand_num_in_DEC)[i: max_print_length + i])
 			else:
 				print("")
 				break
@@ -595,9 +611,9 @@ def create_random_64b_key(size_in_bit = 2, rotors = [], show = False): #todo usu
 		rand_num_in_DEC //= 64
 	if show:
 		print("Random number in 64b: ")
-		for i in range(0, len(str(rand_num_in_64b)) + 60, 60):
-			if str(rand_num_in_64b)[i: 60 + i]:
-				print(str(rand_num_in_64b)[i: 60 + i])
+		for i in range(0, len(str(rand_num_in_64b)) + max_print_length, max_print_length):
+			if str(rand_num_in_64b)[i: max_print_length + i]:
+				print(str(rand_num_in_64b)[i: max_print_length + i])
 			else:
 				print("")
 				break
@@ -723,7 +739,7 @@ def convert_list_to_str(text_before):
 	return text_in_str
 
 
-def show_help(place):
+def show_help(message):
 	print("""
 Simple programme for encrypts and decrypts files.
 Usage:      enigma5 -c [file of files, you can use reg.]
@@ -748,18 +764,35 @@ Usage:      enigma5 -c [file of files, you can use reg.]
             enigma5 -h --help               Display this help and exit
             enigma5 -V --version            Output version information and exit
    
-Examples:   enigma5.py -K your_key_name 2048
+Examples:   simnigma.py -K your_key_name 2048
                 First you need to create a random key, 2048 it is size in bit
-            enigma5.py -R your_rotors_name 20
+            simnigma.py -R your_rotors_name 20
                 Then you have to create a random 8-bit rotors, 8bit is the default setting for files,
                 20 is the number of rotors
-            enigma5.py -c some_file.txt [-k your_key_name] [-r your_rotors_name]
+            simnigma.py -c some_file.txt [-k your_key_name] [-r your_rotors_name]
                 Now you can encrypt any file or files if you use reg. [for example *], encrypted files
                 will be updated .enc. You can also use a different key or rotors if you insert the -k or -r option.
                 By default, the most recently created keys and rotors are loaded from the keys and rotors
-                catalogs from the enigma5.py directory.
-            enigma5.py -d some_file.txt.enc [-k your_key_name] [-r your_rotors_name]
+                catalogs from the simnigma.py directory.
+            simnigma.py -d some_file.txt.enc [-k your_key_name] [-r your_rotors_name]
                 And last you can decrypt file or files, remember that you must use the same rotors and keys as
                  you use to encrypt, what is logically
 	""")
-	exit(place)
+	exit(bcolors.WARNING + 'Error: ' + message + bcolors.ENDC)
+
+
+def printd(*argss, debug=False, max_print_length = 100):
+	global number_of_printd
+	if debug:
+		line_no = inspect.stack()[1][2]
+		frame = inspect.getouterframes(inspect.currentframe())[1]
+		string = inspect.getframeinfo(frame[0]).code_context[0].strip()
+		varibal_name = string[string.find('(') + 1:-1].split(',')
+		
+		for i, arg in enumerate(argss):
+			number_of_printd += 1
+			if len(str(arg)) > max_print_length - 30:
+				print_long((bcolors.INYELLOW + '{} --- Debag line: {} ---{} ---> '.format(number_of_printd, line_no, varibal_name[i])), arg, 20, 140)
+				print(bcolors.ENDC, end = '')
+			else:
+				print(bcolors.INYELLOW + '{} --- Debag line: {} ---{} ---> '.format(number_of_printd, line_no, varibal_name[i]) + str(arg) + bcolors.ENDC)

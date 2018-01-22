@@ -7,7 +7,8 @@ from math import log
 
 
 def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encrypt = [], text_decrypt = [],
-               show_all=False, show_first=False, show_short=False, show_calc=False, show_uni=False):
+               show_all=False, show_first=False, show_short=False, show_calc=False, show_uni=False, max_print_length = 110,
+               min_print_length=15, space = 47):
 			
 	key_enc_before = key_enc[:]
 	key_dec_before = key_dec[:]
@@ -22,9 +23,9 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 	key = key_enc if key_enc else key_dec
 	cal_pattern_length = calc_number_comb(rotors, key)
 	
-	max_print_length = 110
-	min_print_length = 15
-	space = 47
+	
+	
+	
 	if show_all or show_first:
 		# Print rotors
 		print_long("Rotor", rotors, min_print_length, max_print_length)
@@ -59,11 +60,11 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 				print("Number of passes:" + " " * (space - 17), "[" + str(key_len // i) + " passes]")
 				break
 		print("Rotors, number of key-val:" + " " * (space - 26), "[" + format(decimal.Decimal(len(rotors[0])), '.2E') + "]")
-		if check_rand_rotors(rotors)[0]:
+		if check_rand_rotors(rotors): # był wybrany tylko 1 DLACZEGO !?
 			print("Minimum value in rotor:" + " " * (space - 22) + "[" + str(min(rotors[0])) + " min]")
 			print("Maximum value in rotor:" + " " * (space - 22) + "[" + str(max(rotors[0])) + " max]")
 			print("Equality test of rotors:" + " " * (space - 23) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
-			if check_rand_rotors(rotors)[1]:
+			if check_rand_rotors(rotors): # był wybrany tylko 1 i do tego kolejny a nie 0 jak poprzednio DLACZEGO !?
 				print("Randomness and integrity rotor test:" + " " * (space - 35) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 			else:
 				print("Randomness and integrity rotor test:" + " " * (space - 35) + "[" + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")

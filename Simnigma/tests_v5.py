@@ -5,12 +5,12 @@ import sys
 import os
 from modules.tools import save_key, create_rotors, load_key, load_file, save_file
 
-from Enigma_all.Enigma_v5.modules.__tools_single import generate_from_64b_inter_key
-from Enigma_all.Enigma_v5.modules.tests_def import test_5r_8b_file_txt_encrypt, test_5r_8b_file_txt_decrypt, test_3r_2b
+from Simnigma_all.Simnigma.modules.__tools_single import generate_from_64b_inter_key
+from Simnigma_all.Simnigma.modules.tests_def import test_5r_8b_file_txt_encrypt, test_5r_8b_file_txt_decrypt, test_3r_2b
 
 # test_5r_8b_file_txt_encrypt()
 # test_5r_8b_file_txt_decrypt()
-from Enigma_all.Enigma_v5.modules.tools import create_key, key_from_64b_to_dec, create_random_64b_key
+from Simnigma_all.Simnigma.modules.tools import create_key, key_from_64b_to_dec, create_random_64b_key
 
 # rotors = {0: 2, 1: 0, 2: 3, 3: 1}, {0: 3, 1: 2, 2: 0, 3: 1}, {0: 3, 1: 0, 2: 1, 3: 2}
 # print("---generate_from_64b_inter_key---", generate_from_64b_inter_key("adsf", rotors, True))

@@ -1,11 +1,11 @@
 import decimal
 from math import log
 
-from Enigma_all.Enigma_4.modules.core import (EncryptFirstDrum, EncryptNextDrum,
+from Simnigma_all.Enigma_4.modules.core import (EncryptFirstDrum, EncryptNextDrum,
                                                 DecryptFirstDrum, DecryptNextDrum,
                                                 )
-from Enigma_all.Enigma_4.modules.__tools_single import bcolors, gen_text
-from Enigma_all.Enigma_4.modules.tools import create_drums, check_rand_drums
+from Simnigma_all.Enigma_4.modules.__tools_single import bcolors, gen_text
+from Simnigma_all.Enigma_4.modules.tools import create_drums, check_rand_drums
 
 # todo key przenieś do metody -1
 # todo timingi dorub
@@ -141,7 +141,7 @@ text_decrypt = decrypt_first.get_encrypt_list()
 
 drums = drum1, drum2, drum3 #, drum1, drum2, drum3, drum1, drum2, drum3, drum1, drum2, drum3
 
-from Enigma_all.Enigma_4.modules.test_print import test_print
+from Simnigma_all.Enigma_4.modules.test_print import test_print
 
 
 

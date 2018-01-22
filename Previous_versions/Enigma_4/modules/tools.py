@@ -1,6 +1,6 @@
 # only functions to generate tools for ten drums encrypts
 
-from Enigma_all.Enigma_4.modules.__tools_single \
+from Simnigma_all.Enigma_4.modules.__tools_single \
 	import (__cre_drum, __save_drum, __load_drum, __check_rand_drum)
 
 

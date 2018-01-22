@@ -5,8 +5,8 @@ import decimal
 from math import log
 from random import randint
 
-from Enigma_all.Enigma_v5.modules.test_print import test_print
-from Enigma_all.Enigma_v5.modules.tools import save_rotors, load_rotors, encrypt, decrypt, gen_text, check_patterns, \
+from Simnigma_all.Simnigma.modules.test_print import test_print
+from Simnigma_all.Simnigma.modules.tools import save_rotors, load_rotors, encrypt, decrypt, gen_text, check_patterns, \
     create_key, check_all_patterns, create_rotors, key_from_64b_to_dec, load_key, create_random_64b_key, load_file, \
     save_file, save_key, convert_str_to_list
 
