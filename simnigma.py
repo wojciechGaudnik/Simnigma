@@ -198,12 +198,12 @@ elif ('-c' in sys.argv) or ('-d' in sys.argv):
 		key_name_load = max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'keys/*'), key=os.path.getatime)
 		key = load_file_all(key_name_load, 'key', True)
 printd(key, debug=debug)
-if key:
+if not key_name_save and key:
 	if check_64b_key(key):
 		if show==False: print("Key test:" + " " * (space - 6) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 	else:
 		show_help("Key {} are broken, make new or del broken".format(key_name_load))
-else:
+elif not key_name_save:
 	show_help("You don't have any keys, make or connect USB with key")
 
 
@@ -229,13 +229,13 @@ elif ('-c' in sys.argv) or ('-d' in sys.argv):
 		rotors_name_load = max(glob.glob(options[0][:options[0].rfind('/') + 1] + 'rotors/*.rotors'), key=os.path.getatime)
 		rotors = load_file_all(rotors_name_load, 'rotors_from_one_file', True)
 printd(rotors, debug=debug)
-if rotors:
+if not rotors_name_save and rotors:
 	if check_rand_rotors(rotors):
 		if min(rotors[0]) == 0 and max(rotors[0]) == 255 and min(rotors[0].values()) == 0 and max(rotors[0].values()) == 255:
 			if show==False: print("Randomness and integrity rotor test:" + " " * (space - 33) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 		else:
 			show_help("Rotors {} are broken, make new or del broken".format(rotors_name_load))
-else:
+elif rotors_name_save:
 	show_help("You don't have any rotors, make or connect USB with rotors")
 
 
