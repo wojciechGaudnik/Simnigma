@@ -1,4 +1,6 @@
 # only classes for encryption and decryption
+import time
+
 from .__tools_single import generate_from_64b_inter_key, __test
 import sys
 
@@ -90,6 +92,11 @@ class EncryptSet:
 		self.__len_key_block = 0
 		self.__list_before_max = len(list_before)
 		self.__print_test = 0
+		self.__time_start = 0
+		self.__time_one_process = 0
+		self.__time_all_process = 0
+		self.__time_all_process_avg = 0
+		self.__time_cycles = 0
 		
 		for i in range(EncryptNextRotor.rotor_number - 1, 0, -1): # todo dodałęm - 1!!!
 			if len(self.__key_enc) % i == 0:
@@ -109,10 +116,11 @@ class EncryptSet:
 			if self.__print_test == 0:
 				# sys.stdout.flush()
 				# sys.stdout.write('\r\b')
-				print("\rProgress encrypt:" + " " * 31 + "[100 %]" + " " * 10)
+				print("\rProgress encrypt:" + " " * 31 + "[100 %]" + " " * 50)
 				self.__print_test = -1
 		else:
-			sys.stdout.write("\rProgress encrypt ... " + " " * 27 + "[%.4f %%]    " % (progress))
+			sys.stdout.write("\rProgress encrypt ... " + " " * 27 + "[%.4f %%] " % (progress))
+			# sys.stdout.write("Time left: {:02.0f}:{:02.0f}:{:02.0f}                    ".format(h, m, s))
 		
 		if len(enc) == 1:
 			enc = self.__init__enc
@@ -143,6 +151,19 @@ class EncryptSet:
 		self.__cycles_finished += 1
 		# If the end key, the cycle also ends
 		if self.__cycles_finished == self.__cycles:
+			self.__time_one_process = time.time() - self.__time_start
+			self.__time_start = time.time()
+			self.__time_all_process = (len(self.__list_before)) * self.__time_one_process
+			m, s = divmod(self.__time_all_process, 60)
+			h, m = divmod(m, 60)
+			sys.stdout.write("Time left: {:02.0f}:{:02.0f}:{:02.0f}                    ".format(h, m, s))
+
+			# if self.__time_cycles < 100:
+			# 	self.__time_cycles += 1
+			# 	self.__time_all_process_avg += self.__time_all_process
+			# else:
+			# 	self.__time_all_process_avg /= self.__time_cycles
+			# 	self.__time_cycles = 0
 			self.__cycles_finished = 0
 		return enc
 
