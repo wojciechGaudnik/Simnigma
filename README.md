@@ -22,7 +22,7 @@ Usage:      simnigma -c [file of files, you can use reg.]
             simnigma -d [file] -k [file] -r [first rotor file, or name in dictionary rotors]
                 Decryption with the indicated key and indicated rotors and their number
             
-            simnigma -K [name], [size]       Create key, size in bits
+            simnigma -K [name], [size]       Create key, size in bits. 
             simnigma -R [name], [number]     Create rotors, name only common part, number of created rotors
             
             simnigma -v --verbose            Show all progress
@@ -35,7 +35,7 @@ Usage:      simnigma -c [file of files, you can use reg.]
             # todo simnigma -rsa             Lock and anlock with rsa keys
             
 Examples:   simnigma.py -K your_key_name 2048 
-                First you need to create a random key, 2048 it is size in bit 
+                First you need to create a random key, 2048 it is size in bit. The Key will be saved in /keys diroctory of simnigma 
             simnigma.py -R your_rotors_name 20 
                 Then you have to create a random 8-bit rotors, 8bit is the default setting for files, 
                 20 is the number of rotors 
@@ -43,13 +43,14 @@ Examples:   simnigma.py -K your_key_name 2048
                 Now you can encrypt any file or files if you use reg. [for example *], encrypted files
                 will be updated .enc. You can also use a different key or rotors if you insert the -k or -r option.
                 By default, the most recently created keys and rotors are loaded from the keys and rotors 
-                catalogs from the simnigma.py directory.
+                catalogs from the simnigma.py directory or if you are working on linux and connect USB than key and rotors
+                will be loaded from pendrive.
             simnigma.py -d some_file.txt.enc [-k your_key_name] [-r your_rotors_name] 
                 And last you can decrypt file or files, remember that you must use the same rotors and keys as
                  you use to encrypt, what is logically
 			
-
-
+More examples:
+            simnigma.py -K your_key_name.key key will be saved in current directory 
 
 
 

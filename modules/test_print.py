@@ -1,6 +1,6 @@
 from modules.__tools_single import bcolors, generate_from_64b_inter_key
-from modules.tools import check_text_const, check_rand_rotors, create_key, check_patterns, \
-	check_all_patterns, key_from_64b_to_dec, calc_number_comb, print_long
+from modules.tools import check_text_const, check_rand_rotors, check_patterns, \
+	check_all_patterns, calc_number_comb, print_long, key_from_64b_to_dec
 
 import decimal
 from math import log
@@ -76,6 +76,8 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 		
 		# Print short keys info
 		key_len_before = len(key_enc_before) if key_enc_before else len(key_dec_before)
+		key = key_enc_before if key_enc_before else key_dec_before
+		print("Key len. in bit:" + " " * (space - 15) + "[" + str(int(log(key_from_64b_to_dec(key), 2))) + " bit]")
 		print("Key len. in num. el.:" + " " * (space - 20) + "[" + format(decimal.Decimal(key_len_before), '.2E') + "]")
 		print("Key int. len. in num. el.:" + " " * (space - 25) + "[" + format(decimal.Decimal(key_len), '.2E') + "]")
 		if (key_enc) and (key_dec):

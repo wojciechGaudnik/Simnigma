@@ -99,98 +99,6 @@ def create_rotors(size_in_bit, mix, number_of_rotors): # todo daj mix Tru i na k
 
 
 
-def load_file_all(name, what_load = '', show = False, number = 0):
-	
-	if what_load == 'key':
-		name += ".key" if ".key" not in name[-4:] else ""
-		key_list = []
-		try:
-			f = open(name, 'rb')
-			key_list = f.read()
-			f.close()
-			if show == True: print('Loaded key:   ', name)
-		except:
-			exit(bcolors.WARNING + "Error: Can't open key file {}".format(name) + bcolors.ENDC)
-		key = ""
-		key_ret = ""
-		for c in key_list:
-			key += chr(c)
-		key_ret = key_ret.join(key)
-		return key_ret[:-1]
-	
-	if what_load == 'rotors_from_one_file':
-		name += ".rotors" if ".rotors" not in name[-7:] else ""
-		rotors = {}
-		try:
-			f = open(name, 'rb')
-			rotors = pickle.load(f)
-			f.close()
-			if show == True:  print('Loaded rotors:', name)
-		except:
-			exit(bcolors.WARNING + "Error: Can't open rotors file {}".format(name) + bcolors.ENDC)
-		return rotors
-	
-	if what_load == 'rotors_from_files':
-		name += ".rot" if ".rot" not in name[-4:] else ""
-		return ([__load_rotor(x) for x in (name + '_' + str(x) for x in range(1, number + 1))])
-	
-	if what_load == 'file':
-		file = []
-		try:
-			f = open(name, "rb")
-			file = f.read()
-			f.close()
-			if show == True:  print('Loaded file:  ', name)
-		except:
-			exit(bcolors.WARNING + "Error: Can't open file {}".format(name) + bcolors.ENDC)
-		file = list(file)
-		return file[:-1]
-		
-	
-
-
-def save_file_all(name, obj, what_save = '', show = False):
-	
-	if what_save == 'key':
-		name += ".key" if ".key" not in name[-4:] else ""
-		f = open(name, "wb")
-		try:
-			f.write(bytes(obj + "\n", 'ascii'))
-			f.close()
-			if show == True: print('Saved key:     ', name)
-		except:
-			exit(bcolors.WARNING + "Error: Can't save key file {}".format(name) + bcolors.ENDC)
-
-	if what_save == 'rotors_in_one_file':
-		name += ".rotors" if ".rotors" not in name[-7:] else ""
-		try:
-			f = open(name, 'wb')
-			pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
-			f.close()
-			if show == True: print('Saved rotors: ', name)
-		except:
-			exit(bcolors.WARNING + "Error: Can't save rotors file {}".format(name) + bcolors.ENDC)
-
-	if what_save == 'rotors_in_files':
-		name += ".rot" if ".rot" not in name[-4:] else ""
-		for i, rotor in enumerate(obj):
-			__save_rotor(rotor, name + '_' + str(i +1))
-
-	if what_save == 'file':
-		obj.append(10)
-		try:
-			f = open(name, "wb")
-			f.write(bytes(obj))
-			f.close()
-			if show == True:  print('Saved file:   ', name)
-		except:
-			exit(bcolors.WARNING + "Error: Can't save file {}".format(name) + bcolors.ENDC)
-
-
-
-
-
-
 
 
 def check_rand_rotors(rotors):
@@ -443,7 +351,41 @@ def check_patterns(text_to_check, min_len = 4, max_num_patterns = 1, show = Fals
 	return False
 
 # todo do usunięcia ?!?!?
-def create_key(key_my, rotors):
+# def create_key(key_my, rotors):
+# 	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
+# 	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
+# 	             "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "q": 26, "r": 27, "s": 28, "t": 29, "u": 30,
+# 	             "v": 31, "w": 32, "x": 33, "y": 34, "z": 35, "A": 36, "B": 37, "C": 38, "D": 39, "E": 40,
+# 	             "F": 41, "G": 42, "H": 43, "I": 44, "J": 45, "K": 46, "L": 47, "M": 48, "N": 49, "O": 50,
+# 	             "P": 51, "Q": 52, "R": 53, "S": 54, "T": 55, "U": 56, "V": 57, "W": 58, "X": 59, "Y": 60,
+# 	             "Z": 61, "+": 62, "/": 63}
+#
+# 	if isinstance(key_my, str):
+# 		key_my = key_my.lower()
+# 		number_in_32b = 0
+# 		i = 0
+# 		while key_my:
+# 			number_in_32b += dic_64b_1[key_my[-(1 + i)]] * (32 ** i)
+# 			i += 1
+# 			if len(key_my) == i:
+# 				break
+# 		i = 0
+# 		key = [0, ]
+# 		while number_in_32b:
+# 			key[i] = number_in_32b % (len(rotors[0]))
+# 			number_in_32b //= (len(rotors[0]))
+# 			i += 1
+# 			if number_in_32b < (len(rotors[0])):
+# 				key += [number_in_32b, ]
+# 				break
+# 			key += [0, ]
+# 		key = reversed(key)
+# 		return list(key)
+# 	else:
+# 		return key_my
+
+# change key if 64b to DEC
+def key_from_64b_to_dec(key_my):
 	dic_64b_1 = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
 	             "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
 	             "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "q": 26, "r": 27, "s": 28, "t": 29, "u": 30,
@@ -451,47 +393,14 @@ def create_key(key_my, rotors):
 	             "F": 41, "G": 42, "H": 43, "I": 44, "J": 45, "K": 46, "L": 47, "M": 48, "N": 49, "O": 50,
 	             "P": 51, "Q": 52, "R": 53, "S": 54, "T": 55, "U": 56, "V": 57, "W": 58, "X": 59, "Y": 60,
 	             "Z": 61, "+": 62, "/": 63}
-	
-	if isinstance(key_my, str):
-		key_my = key_my.lower()
-		number_in_32b = 0
-		i = 0
-		while key_my:
-			number_in_32b += dic_64b_1[key_my[-(1 + i)]] * (32 ** i)
-			i += 1
-			if len(key_my) == i:
-				break
-		i = 0
-		key = [0, ]
-		while number_in_32b:
-			key[i] = number_in_32b % (len(rotors[0]))
-			number_in_32b //= (len(rotors[0]))
-			i += 1
-			if number_in_32b < (len(rotors[0])):
-				key += [number_in_32b, ]
-				break
-			key += [0, ]
-		key = reversed(key)
-		return list(key)
-	else:
-		return key_my
 
-# change key if 64b to DEC
-def key_from_64b_to_dec(key_my):
-	dic_32b = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "a": 10,
-	           "b": 11, "c": 12, "d": 13, "e": 14, "f": 15, "g": 16, "h": 17, "i": 18, "j": 19, "k": 20,
-	           "l": 21, "m": 22, "n": 23, "o": 24, "p": 25, "r": 26, "s": 27, "t": 28, "u": 29, "v": 30, "w": 31}
-
-	number_in_32b = 0
+	number_in_dec = 0
+	i = 0
 	if isinstance(key_my, str):
-		key_my = key_my.lower()
-		i = 0
-		while key_my:
-			number_in_32b += dic_32b[key_my[-(1 + i)]] * (32 ** i)
+		for h in key_my:
+			number_in_dec += dic_64b_1[h] * (64 ** i)
 			i += 1
-			if len(key_my) == i:
-				break
-	return number_in_32b
+	return number_in_dec
 
 
 def check_64b_key(key_my):
@@ -797,3 +706,87 @@ def printd(*argss, debug=False, max_print_length = 100):
 				print(bcolors.ENDC, end = '')
 			else:
 				print(bcolors.INYELLOW + '{} --- Debag line: {} ---{} ---> '.format(number_of_printd, line_no, varibal_name[i]) + str(arg) + bcolors.ENDC)
+
+
+def load_file_all(name, what_load='', show=False, number=0):
+	if what_load == 'key':
+		name += ".key" if ".key" not in name[-4:] else ""
+		key_list = []
+		try:
+			f = open(name, 'rb')
+			key_list = f.read()
+			f.close()
+		except:
+			exit(bcolors.WARNING + "Error: Can't open key file {}".format(name) + bcolors.ENDC)
+		key = ""
+		key_ret = ""
+		for c in key_list:
+			key += chr(c)
+		key_ret = key_ret.join(key)
+		if show == True: print('Loaded key:   ', name, (int(log(key_from_64b_to_dec(key_ret[:-1]), 2))), 'bit')
+		return key_ret[:-1]
+	
+	if what_load == 'rotors_from_one_file':
+		name += ".rotors" if ".rotors" not in name[-7:] else ""
+		rotors = {}
+		try:
+			f = open(name, 'rb')
+			rotors = pickle.load(f)
+			f.close()
+			if show == True:  print('Loaded rotors:', name , len(rotors), 'items', str(int(log(len(rotors[0]), 2))), 'bit')
+		except:
+			exit(bcolors.WARNING + "Error: Can't open rotors file {}".format(name) + bcolors.ENDC)
+		return rotors
+	
+	if what_load == 'rotors_from_files':
+		name += ".rot" if ".rot" not in name[-4:] else ""
+		return ([__load_rotor(x) for x in (name + '_' + str(x) for x in range(1, number + 1))])
+	
+	if what_load == 'file':
+		file = []
+		try:
+			f = open(name, "rb")
+			file = f.read()
+			f.close()
+			if show == True:  print('Loaded file:  ', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't open file {}".format(name) + bcolors.ENDC)
+		file = list(file)
+		return file[:-1]
+
+
+def save_file_all(name, obj, what_save='', show=False):
+	if what_save == 'key':
+		name += ".key" if ".key" not in name[-4:] else ""
+		f = open(name, "wb")
+		try:
+			f.write(bytes(obj + "\n", 'ascii'))
+			f.close()
+			if show == True: print('Saved key:     ', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't save key file {}".format(name) + bcolors.ENDC)
+	
+	if what_save == 'rotors_in_one_file':
+		name += ".rotors" if ".rotors" not in name[-7:] else ""
+		try:
+			f = open(name, 'wb')
+			pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+			f.close()
+			if show == True: print('Saved rotors: ', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't save rotors file {}".format(name) + bcolors.ENDC)
+	
+	if what_save == 'rotors_in_files':
+		name += ".rot" if ".rot" not in name[-4:] else ""
+		for i, rotor in enumerate(obj):
+			__save_rotor(rotor, name + '_' + str(i + 1))
+	
+	if what_save == 'file':
+		obj.append(10)
+		try:
+			f = open(name, "wb")
+			f.write(bytes(obj))
+			f.close()
+			if show == True:  print('Saved file:   ', name)
+		except:
+			exit(bcolors.WARNING + "Error: Can't save file {}".format(name) + bcolors.ENDC)

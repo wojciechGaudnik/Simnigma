@@ -37,12 +37,21 @@
 import sys
 import os
 import glob
+from math import log
 
 from modules.__tools_single import bcolors
 from modules.tools import encrypt, decrypt, create_random_64b_key, print_long, show_help, \
 	convert_str_to_list, convert_list_to_str, load_file_all, save_file_all, printd, create_rotors,\
-	check_rand_rotors, check_64b_key
+	check_rand_rotors, check_64b_key, key_from_64b_to_dec
 from modules.test_print import test_print
+
+
+# key = create_random_64b_key(10000, show=True)
+# key_in_dec = key_from_64b_to_dec(key)
+# print(key_in_dec)
+# print(int(log(key_from_64b_to_dec(key), 2)))
+#
+# exit()
 
 
 
@@ -70,6 +79,7 @@ only_screen = False
 key = ''
 rotors = []
 
+# extracting options from the command line
 printd( options, debug=debug)
 if '-c' in options:
 	for file_my in options[options.index('-c') + 1:]:
@@ -87,29 +97,24 @@ if '-d' in options:
 			break
 	del options[options.index('-d') + 1: options.index('-d') + len(files_to_decrypt) + 1]
 	options.remove('-d')
-
 if '-k' in options:
 	if options[options.index('-k') + 1][0] != '-':
 		key_name_load += options[options.index('-k') + 1]
 	del options[options.index('-k') + 1]
 	options.remove('-k')
-
 if '-r' in options:
 	if options[options.index('-r') + 1][0] != '-':
 		rotors_name_load += options[options.index('-r') + 1]
 	del options[options.index('-r') + 1]
 	options.remove('-r')
-
 if '-v' in options or '--verbose' in options:
 	show = True
 	try: options.remove('-v')
 	except: options.remove('--verbose')
-
 if '-s' in options or '--silent' in options:
 	only_screen = True
 	try: options.remove('-s')
 	except: options.remove('--silent')
-
 if '-K' in options:
 	if options[options.index('-K') + 1][0] != '-':
 		key_name_save += options[options.index('-K') + 1]
@@ -121,7 +126,6 @@ if '-K' in options:
 	del options[options.index('-K') + 2]
 	del options[options.index('-K') + 1]
 	options.remove('-K')
-
 if '-R' in options:
 	if options[options.index('-R') + 1][0] != '-':
 		rotors_name_save += options[options.index('-R') + 1]
@@ -133,15 +137,13 @@ if '-R' in options:
 	del options[options.index('-R') + 2]
 	del options[options.index('-R') + 1]
 	options.remove('-R')
-
 if '-h' in options  or '--help' in options:
 	show_help('')
-
 if '-V' in options or '--version' in options:
 	print("Simnigma version", version)
 	exit()
 
-
+# sprawdzenie opcji z lini komend
 printd( options, files_to_encrypt, files_to_decrypt, key_name_load, key_name_save, key_size,  rotors_name_load, rotors_name_save, rotors_number, only_screen, show, debug=debug)
 if len(sys.argv) == 1:
 	show_help("No options")
@@ -164,6 +166,7 @@ if ('-c' in sys.argv or '-d' in sys.argv) and ('-K' in sys.argv or '-R' in sys.a
 if ('-K' in sys.argv or '-R' in sys.argv) and ('-s') in sys.argv:
 	show_help("Too many options, at the same time you can't create key or rotors in silent mode")
 
+# loading the key
 if key_name_load:
 	printd(key_name_load, debug=debug)
 	if key_name_load[0] == '/':
@@ -193,8 +196,7 @@ if not rotors_name_save and not key_name_save and key:
 elif not rotors_name_save and not key_name_save :
 	show_help("You don't have any keys, make or connect USB with key")
 
-
-
+# loading of rotors
 if rotors_name_load:
 	printd(rotors_name_load, debug=debug)
 	if rotors_name_load[0] == '/':
@@ -225,9 +227,7 @@ if  not rotors_name_save and not key_name_save and rotors:
 elif not rotors_name_save and not key_name_save:
 	show_help("You don't have any rotors, make or connect USB with rotors")
 
-
-
-
+# encrypt file
 if files_to_encrypt and  not only_screen:
 	printd(files_to_encrypt, debug=debug)
 	for file_my in files_to_encrypt[:]:
@@ -265,7 +265,7 @@ if files_to_encrypt and only_screen:
 	if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
 	                    show_all=True, show_uni=True)
 	
-
+# decrypt file
 if files_to_decrypt and not only_screen:
 	printd(files_to_decrypt, debug=debug)
 	for file_my in files_to_decrypt[:]:
@@ -305,24 +305,48 @@ if files_to_decrypt and only_screen :
 		for line in text_decrypt:
 			print('---> ', line)
 
-
+# creating and saving key and rotors
 if key_name_save:
 	printd(key_name_save, key_size, debug=debug)
+	if key_name_save[0] == '/':
+		pass
+	elif key_name_save[0:2] == '..':
+		key_name_save = os.getcwd()[:os.getcwd().rfind('/')] + key_name_save[2:]
+	elif key_name_save[0:2] == './':
+		key_name_save = os.getcwd() + key_name_save[1:]
+	elif key_name_save[-4:] == '.key':
+		key_name_save = os.getcwd() + '/' + key_name_save
+	elif key_name_save:
+		key_name_save = options[0][:options[0].rfind('/')] + '/keys/' + key_name_save
 	key = create_random_64b_key(key_size, max_print_length=max_print_length, show=show)
-	print('Key created:   ', key_name_save, str(key_size) + " bit")
-	key_name_save = options[0][:options[0].rfind('/')] + '/keys/' + key_name_save
+	print('Key created:   ', key_name_save[key_name_save.rfind('/') + 1:], str(key_size) + " bit")
 	save_file_all(key_name_save, key, 'key', show=True)
 	printd(key, debug=debug)
 if rotors_name_save:
 	printd(rotors_name_save, rotors_number, debug=debug)
+	if rotors_name_save[0] == '/':
+		pass
+	elif rotors_name_save[0:2] == '..':
+		rotors_name_save = os.getcwd()[:os.getcwd().rfind('/')] + rotors_name_save[2:]
+	elif rotors_name_save[0:2] == './':
+		rotors_name_save = os.getcwd() + rotors_name_save[1:]
+	elif rotors_name_save[-7:] == '.rotors':
+		rotors_name_save = os.getcwd() + '/' + rotors_name_save
+	elif rotors_name_save:
+		rotors_name_save = options[0][:options[0].rfind('/')] + '/rotors/' + rotors_name_save
 	rotors = create_rotors(8, True, rotors_number)
 	if show: print_long('Rotor', rotors, min=min_print_length, max=max_print_length)
-	print('Rotors created:', rotors_name_save, str(rotors_number) + " items")
-	rotors_name_save = options[0][:options[0].rfind('/')] + '/rotors/' + rotors_name_save
+	print('Rotors created:', rotors_name_save[rotors_name_save.rfind('/') + 1:], str(rotors_number) + " items")
 	save_file_all(rotors_name_save, rotors, 'rotors_in_one_file', show=True)
 	printd(rotors, debug=debug)
 	
 
+	
+	
+	
+	
+	
+	
 	
 
 exit()
