@@ -6,6 +6,7 @@ import inspect
 import time
 from random import randint
 
+import os
 import sys
 
 from math import log
@@ -169,10 +170,10 @@ def check_text_const(text_before):
 	return True
 
 
-def encrypt(rotors, key_enc, text_before):
+def encrypt(rotors, key_enc, text_before, show=False):
 	# internal_key_enc = __generate_inter_key(key_enc, rotors)
 	encrypt_rotors = [EncryptNextRotor(rotor) for rotor in rotors]
-	encrypt_first = EncryptSet(key_enc[:], text_before[:], rotors)
+	encrypt_first = EncryptSet(key_enc[:], text_before[:], rotors, show=show)
 	
 	enc = [True]
 	while True:
@@ -185,10 +186,10 @@ def encrypt(rotors, key_enc, text_before):
 	return text_encrypt
 
 
-def decrypt(rotors, key_dec, text_encrypt):
+def decrypt(rotors, key_dec, text_encrypt, show=False):
 	# internal_key_dec = __generate_inter_key(key_dec, rotors)
 	decrypt_rotors = [DecryptNextRotor(rotor) for rotor in rotors]
-	decrypt_first = DecryptSet(key_dec[:], text_encrypt[:], rotors)
+	decrypt_first = DecryptSet(key_dec[:], text_encrypt[:], rotors, show=show)
 	
 	dec = [True]
 	while True:
@@ -648,30 +649,31 @@ def convert_list_to_str(text_before):
 	return text_in_str
 
 
-def show_help(message=''):
-	print("""
+def show_help(message='', show=True):
+	if show:
+		print("""
 Simple programme for encrypts and decrypts files.
-Usage:      enigma5 -c [file of files, you can use reg.]
+Usage:      simnigma -c [file of files, you can use reg.]
                 Encryption the file (default key will be used the last created in the keys directory,
                 the drums will be loaded with all the last ones created in the rotors directory)
-            enigma5 -d [file of files, you can use reg.]
+            simnigma -d [file of files, you can use reg.]
                 Decryption the file (default are the same as with encryption)
-            enigma5 -c [file] -k [file or key name in dictionary keys]
+            simnigma -c [file] -k [file or key name in dictionary keys]
                 Encryption with the indicated key
-            enigma5 -d [file] -k [file or key name in dictionary keys]
+            simnigma -d [file] -k [file or key name in dictionary keys]
                 Decryption with the indicated key
-            enigma5 -c [file] -k [file] -r [first rotor file, or name in dictionary rotors]
+            simnigma -c [file] -k [file] -r [first rotor file, or name in dictionary rotors]
                 Encryption with the indicated key and indicated rotors and their number
-            enigma5 -d [file] -k [file] -r [first rotor file, or name in dictionary rotors]
+            simnigma -d [file] -k [file] -r [first rotor file, or name in dictionary rotors]
                 Decryption with the indicated key and indicated rotors and their number
             
-            enigma5 -R [name], [number]     Create rotors, name only common part, number of created rotors
-            enigma5 -K [name], [size]       Create key, size in bits
+            simnigma -R [name], [number]     Create rotors, name only common part, number of created rotors
+            simnigma -K [name], [size]       Create key, size in bits
             
-            enigma5 -v --verbose            Show all progress
-            # todo enigma5 -t --tests              Run tests encrypt and decrypt
-            enigma5 -h --help               Display this help and exit
-            enigma5 -V --version            Output version information and exit
+            simnigma -v --verbose            Show all progress
+            # todo simnigma -t --tests              Run tests encrypt and decrypt
+            simnigma -h --help               Display this help and exit
+            simnigma -V --version            Output version information and exit
    
 Examples:   simnigma.py -K your_key_name 2048
                 First you need to create a random key, 2048 it is size in bit
@@ -687,6 +689,7 @@ Examples:   simnigma.py -K your_key_name 2048
                 And last you can decrypt file or files, remember that you must use the same rotors and keys as
                  you use to encrypt, what is logically
 	""")
+	os.system('setterm -cursor on')
 	if message: exit(bcolors.WARNING + 'Error: ' + message + bcolors.ENDC)
 	else: exit()
 
@@ -717,25 +720,38 @@ def load_file_all(name, what_load='', show=False, number=0):
 			key_list = f.read()
 			f.close()
 		except:
-			exit(bcolors.WARNING + "Error: Can't open key file {}".format(name) + bcolors.ENDC)
+			show_help("Can't open key file {}".format(name), False)
+			# exit(bcolors.WARNING + "Error: Can't open key file {}".format(name) + bcolors.ENDC)
 		key = ""
 		key_ret = ""
 		for c in key_list:
 			key += chr(c)
 		key_ret = key_ret.join(key)
+		if not key: show_help("File with key is empty", False)
 		if show == True: print('Loaded key:   ', name, (int(log(key_from_64b_to_dec(key_ret[:-1]), 2))), 'bit')
 		return key_ret[:-1]
 	
 	if what_load == 'rotors_from_one_file':
 		name += ".rotors" if ".rotors" not in name[-7:] else ""
 		rotors = {}
+		
+		# f = open(name, 'rb')
+		# rotors = pickle.load(f)
+		# f.close()
+		
 		try:
 			f = open(name, 'rb')
 			rotors = pickle.load(f)
 			f.close()
+			
 			if show == True:  print('Loaded rotors:', name , len(rotors), 'items', str(int(log(len(rotors[0]), 2))), 'bit')
-		except:
-			exit(bcolors.WARNING + "Error: Can't open rotors file {}".format(name) + bcolors.ENDC)
+		except EOFError:
+			show_help("File with rotors is empty", False)
+		except:# Exception as e:
+			# print(e)
+			show_help("Can't open rotors file {}".format(name), False)
+
+			# exit(bcolors.WARNING + "Error: Can't open rotors file {}".format(name) + bcolors.ENDC)
 		return rotors
 	
 	if what_load == 'rotors_from_files':

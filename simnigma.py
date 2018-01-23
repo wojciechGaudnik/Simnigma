@@ -1,22 +1,22 @@
 #!/usr/bin/python3
 
 
-# todo czas pozostały do zaszyfrowania odszyfrowania
 # todo przenieś z generatorów kluczy funkcje zmieniaja ce 64b na DEC itp do __Tools_single
 # todo dorób rekurenje do wychodzenia w katalogu ponad ../
 # todo zrób mozliwość szyfrowania ponad 8b rotors https://docs.python.org/2/library/struct.html
 # todo zrób to na https://stormpath.com/blog/building-simple-cli-interfaces-in-python
 # todo przerywanie szukania paternów klawiszem ew. po czasie
-# todo generate drum wyeliminuj dic losowe w kolejności przypadkiem zrobione
 # todo popraw gen_text
 # todo timingi dorub
 # todo timingi zrób dekoratorami ?
-# todo ogranicz wielkosc slownika do tłumaczenia
 # todo auto_generate if change bit
-# todo generate or load new dict
 # todo komentarze
 # todo dlaczego jeśli podaję do metody listę def bleble(self, cos_tam)
 # todo      to nie mogę pracować na coś tam i jej zwrucić ?
+# generate or load new dict
+# ogranicz wielkosc slownika do tłumaczenia
+# generate drum wyeliminuj dic losowe w kolejności przypadkiem zrobione
+# czas pozostały do zaszyfrowania odszyfrowania
 # simnigma
 # obsługę wyjątków
 # rotors rozzezenie na rot zroó” !!
@@ -37,7 +37,6 @@
 import sys
 import os
 import glob
-from math import log
 
 from modules.__tools_single import bcolors
 from modules.tools import encrypt, decrypt, create_random_64b_key, print_long, show_help, \
@@ -48,51 +47,10 @@ from modules.test_print import test_print
 
 
 
-# import time
-# import datetime
-#
-# a = 1000000
-# # print(time_start)
-# for i in range(a):
-# 	time_start = time.time()
-# 	# max = 2 ** i
-# 	time.sleep(0.001)
-#
-#
-#
-#
-# 	time_one_process = time.time() - time_start
-# 	time_all_process = (a - i) * time_one_process
-# 	m, s = divmod(time_all_process, 60)
-# 	h, m = divmod(m, 60)
-# 	print(i, "{:02.0f}:{:02.0f}:{:02.0f}".format(h, m, s))
-#
-# 	# print(time_stop)
-	# print(i, str(datetime.timedelta(time_all_process)), end='\r')
-	
-	
-	
-	# time_all_hours = ((time_all // 60) // 60)
-	# if ((time_all%60)%60) > 0:
-	# 	time_all_hours += 1
-	# time_all_minutes = ((time_all // 60)) + 1
-	# if (time_all%60) > 0:
-	# 	time_all_minutes += 1
-	# time_all_seconds = time_all - 60
-	# print(i, time_all_hours, time_all_minutes, time_all_seconds, end='\r')
-	
-# key = create_random_64b_key(10000, show=True)
-# key_in_dec = key_from_64b_to_dec(key)
-# print(key_in_dec)
-# print(int(log(key_from_64b_to_dec(key), 2)))
-
-# exit()
-
-
 
 version = '5.0.0'
 options = sys.argv + [' ',]
-options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version',
+options_all = ('-c', '-d', '-k', '-K', '-R', '-r', '-v', '-f', '--verbose', '-t', '--tests', '-h', '--help', '-V' ,'--version',
                '-s', '--silent')
 max_print_length = 110
 min_print_length = 15
@@ -112,6 +70,7 @@ rotors_name_save = ''
 rotors_number = 0
 show = False
 only_screen = False
+force = False
 key = ''
 rotors = []
 
@@ -178,6 +137,10 @@ if '-h' in options  or '--help' in options:
 if '-V' in options or '--version' in options:
 	print("Simnigma version", version)
 	exit()
+if '-f' in options:
+	force = True
+	options.remove('-f')
+
 
 # sprawdzenie opcji z lini komend
 printd( options, files_to_encrypt, files_to_decrypt, key_name_load, key_name_save, key_size,  rotors_name_load, rotors_name_save, rotors_number, only_screen, show, debug=debug)
@@ -201,6 +164,13 @@ if ('-c' in sys.argv or '-d' in sys.argv) and ('-K' in sys.argv or '-R' in sys.a
 	show_help("Too many options, at the same time you can't encrypt/decrypt and create key or rotors")
 if ('-K' in sys.argv or '-R' in sys.argv) and ('-s') in sys.argv:
 	show_help("Too many options, at the same time you can't create key or rotors in silent mode")
+if key_name_save and key_size > 10000 and not force:
+	show_help("Too long key [limit 10 000], if you have enough time put -f in options")
+if rotors_name_save and rotors_number > 100 and not force:
+	show_help("Too many rotors [limit 100], if you have enough time put -f in options")
+
+
+
 
 # loading the key
 if key_name_load:
@@ -231,6 +201,7 @@ if not rotors_name_save and not key_name_save and key:
 		show_help("Key {} are broken, make new or del broken".format(key_name_load))
 elif not rotors_name_save and not key_name_save :
 	show_help("You don't have any keys, make or connect USB with key")
+
 
 # loading of rotors
 if rotors_name_load:
@@ -264,21 +235,21 @@ elif not rotors_name_save and not key_name_save:
 	show_help("You don't have any rotors, make or connect USB with rotors")
 
 # encrypt file
-if files_to_encrypt and  not only_screen:
+if files_to_encrypt and not only_screen:
 	printd(files_to_encrypt, debug=debug)
+	for file_my in files_to_encrypt[:]:
+		if not os.path.isfile(file_my):
+			print(bcolors.IMPORTANT + 'Warning: "{}" this isn\'t a file'.format(file_my) + bcolors.ENDC)
+			files_to_encrypt.remove(file_my)
 	for file_my in files_to_encrypt[:]:
 		if os.stat(str(os.path.abspath('') + '/' + file_my)).st_size > 0:
 			files_to_encrypt[files_to_encrypt.index(file_my)] = str(os.path.abspath('') + '/' + file_my)
 		else:
 			print(bcolors.IMPORTANT + "Warning: Empty file {}".format(file_my) + bcolors.ENDC)
 			files_to_encrypt.remove(file_my)
-	for file_my in files_to_encrypt[:]:
-		if not os.path.isfile(file_my):
-			print(bcolors.WARNING + '"{}" this isn\'t a file'.format(file_my) + bcolors.ENDC)
-			files_to_encrypt.remove(file_my)
 	for file_my in files_to_encrypt:
 		text_before = load_file_all(file_my, 'file', True)
-		text_encrypt = encrypt(rotors, key, text_before)
+		text_encrypt = encrypt(rotors, key, text_before, show=True)
 		save_file_all(file_my + '.enc', text_encrypt, 'file', True)
 		if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
 		                    show_all=True, show_uni=True, max_print_length=max_print_length, min_print_length=min_print_length,
@@ -298,7 +269,7 @@ if files_to_encrypt and only_screen:
 			break
 	os.system('setterm -cursor off')
 	text_before = convert_str_to_list(text_before)
-	text_encrypt = encrypt(rotors, key, text_before)
+	text_encrypt = encrypt(rotors, key, text_before, show=True)
 	save_file_all(files_to_encrypt[0] + '.enc', text_encrypt, 'file', True)
 	if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
 	                    show_all=True, show_uni=True)
@@ -307,18 +278,18 @@ if files_to_encrypt and only_screen:
 if files_to_decrypt and not only_screen:
 	printd(files_to_decrypt, debug=debug)
 	for file_my in files_to_decrypt[:]:
+		if (not os.path.isfile(file_my) or (file_my[-4:] != '.enc')):
+			print(bcolors.IMPORTANT + 'Warning: "{}" this isn\'t a .enc file'.format(file_my) + bcolors.ENDC)
+			files_to_decrypt.remove(file_my)
+	for file_my in files_to_decrypt[:]:
 		if os.stat(str(os.path.abspath('') + '/' + file_my)).st_size > 0:
 			files_to_decrypt[files_to_decrypt.index(file_my)] = str(os.path.abspath('') + '/' + file_my)
 		else:
 			print(bcolors.IMPORTANT + "Warning: Empty file {}".format(file_my) + bcolors.ENDC)
 			files_to_decrypt.remove(file_my)
-	for file_my in files_to_decrypt[:]:
-		if (not os.path.isfile(file_my) or (file_my[-4:] != '.enc')):
-			print(bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my) + bcolors.ENDC)
-			files_to_decrypt.remove(file_my)
 	for file_my in files_to_decrypt:
 		text_encrypt = load_file_all(file_my, 'file', True)
-		text_decrypt = decrypt(rotors, key, text_encrypt)
+		text_decrypt = decrypt(rotors, key, text_encrypt, show=True)
 		save_file_all(file_my + '.dec', text_decrypt, 'file', True)
 		if show: test_print(rotors=rotors, key_enc=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt,
 		                    show_all=True, show_uni=True, max_print_length=max_print_length, min_print_length=min_print_length,
@@ -335,7 +306,7 @@ if files_to_decrypt and only_screen :
 			exit(bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my) + bcolors.ENDC)
 	for file_my in files_to_decrypt:
 		text_encrypt = load_file_all(file_my, 'file', True)
-		text_decrypt = decrypt(rotors, key, text_encrypt)
+		text_decrypt = decrypt(rotors, key, text_encrypt, show=True)
 		if show: test_print(rotors=rotors, key_enc=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt,
 		                    show_all=True, show_uni=True)
 		text_decrypt = convert_list_to_str(text_decrypt[:-1])
@@ -379,9 +350,6 @@ if rotors_name_save:
 	printd(rotors, debug=debug)
 	
 
-	
-	
-	
 	
 	
 	
