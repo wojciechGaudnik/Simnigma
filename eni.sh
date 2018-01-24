@@ -36,12 +36,32 @@ done
 echo "" >> test_1M.txt
 echo "--- Bash ---> Generate and save test_1M.txt"
 
+for _ in {1..5000000..1}
+do
+echo -n "a" >> test_5M.txt
+done
+echo "" >> test_5M.txt
+echo "--- Bash ---> Generate and save test_5M.txt"
+
+
+simnigma.py -K for_test_1024 1024
+simnigma.py -K for_test_2048 2048
+simnigma.py -R for_test_10 10
+simnigma.py -R for_test_100 100
 
 simnigma.py -c test_10k.txt
 simnigma.py -d test_10k.txt.enc
-diff -sq test_10k.txt test_10k.txt.enc.dec
+diff -sq test_10k.txt test_10k.txt.enc.dec |grep 'różnią się'
+simnigma.py -c test_1M.txt -k for_test_2048
+simnigma.py -d test_1M.txt.enc -k for_test_2048
+diff -sq test_1M.txt test_1M.txt.enc.dec |grep 'różnią się'
 
+simnigma.py -c test_5M.txt -k for_test_2048
+simnigma.py -d test_5M.txt.enc -k for_test_2048
+diff -sq test_5M.txt test_5M.txt.enc.dec |grep 'różnią się'
 
+rm keys/for_test_*
+rm rotors/for_test_10*
 rm *test_*
 #rm *enc*
 

@@ -691,7 +691,7 @@ Examples:   simnigma.py -K your_key_name 2048
 	""")
 	os.system('setterm -cursor on')
 	if message: exit(bcolors.WARNING + 'Error: ' + message + bcolors.ENDC)
-	else: exit()
+	else: os.system('setterm -cursor on'); exit()
 
 
 def printd(*argss, debug=False, max_print_length = 100):
@@ -712,6 +712,14 @@ def printd(*argss, debug=False, max_print_length = 100):
 
 
 def load_file_all(name, what_load='', show=False, number=0):
+	"""
+	
+	:param name:
+	:param what_load: 'key', 'rotors_from_one_file'
+	:param show:
+	:param number:
+	:return:
+	"""
 	if what_load == 'key':
 		name += ".key" if ".key" not in name[-4:] else ""
 		key_list = []

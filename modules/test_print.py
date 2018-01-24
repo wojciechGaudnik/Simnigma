@@ -1,9 +1,73 @@
+import decimal
+from math import log
+
+
 from modules.__tools_single import bcolors, generate_from_64b_inter_key
 from modules.tools import check_text_const, check_rand_rotors, check_patterns, \
 	check_all_patterns, calc_number_comb, print_long, key_from_64b_to_dec
 
-import decimal
-from math import log
+
+
+
+
+# # bit size of drums in bits
+# # drums_contents    "in order", "mixed up"
+# # drums_creation    "load", "generate", "generate and save"
+# # drums_check       "yes", "no"
+# drums_bit = 2
+# size_drums = 2 ** drums_bit
+# drums_contents = "in order"
+# drums_creation = "load"
+# drums_check = "yes"
+#
+# text_length = 0
+#
+# # "random", "min", "max"
+#
+# # first is a number of cycles,
+# # length is a number of drums
+# key_enc = [3, 1, 2, 2]  # 262144 wariacje
+# key_dec = [3, 1, 2, 2]
+#
+# # todo serious things happen here
+# size_drums = 2 ** drums_bit
+#
+#
+#
+#
+# # drum1 = {0 : 2,
+# #          1 : 0,
+# #          2 : 3,
+# #          3 : 1}
+# #
+# # drum2 = {0 : 3,
+# #          1 : 2,
+# #          2 : 0,
+# #          3 : 1}
+# #
+# # drum3 = {0 : 3,
+# #          1 : 0,
+# #          2 : 1,
+# #          3 : 2}
+# #
+# # drums = drum1, drum2, drum3
+# # print(drums)
+#
+# # save_rotors(drums, "./drums/set_drum_2b_")
+#
+# print(drum1, drum2, drum3)
+#
+#
+# # gen_text() #todo triple size !!!
+# # gen_text
+# text_before = gen_text(False, False, False, drum1, 0, 1000)
+# # text_before = [0, 1, 2, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0]
+# # text_before = [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]#, 0, 0, 0]
+# # text_before = [0, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+
+
+
 
 
 def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encrypt = [], text_decrypt = [],

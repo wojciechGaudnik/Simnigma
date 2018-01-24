@@ -161,6 +161,13 @@ class EncryptSet:
 			# h, m = divmod(m, 60)
 			# sys.stdout.write("Time left: {:02.0f}:{:02.0f}:{:02.0f}                    ".format(h, m, s))
 			if self.__show:
+				if not self.__time_start:
+					self.__time_start = time.time()
+				else:
+					self.__time_rest = (self.__list_before_max * (time.time() - self.__time_start) / (self.__list_before_max - len(self.__list_before))) - (time.time() - self.__time_start)
+					m, s = divmod(self.__time_rest, 60)
+					h, m = divmod(m, 60)
+					sys.stdout.write("Time left: [{:02.0f}h:{:02.0f}m:{:02.0f}s]".format(h, m, s))
 				# avg = ((time.time() - self.__time_start) * 10)
 				# print(time.time() - self.__time_start)
 				# if self.__time_cycles < 10:
@@ -182,13 +189,7 @@ class EncryptSet:
 				# 	sys.stdout.write("Time left: [{:02.0f}h:{:02.0f}m:{:02.0f}s]                    ".format(h, m, s))
 				# todo zrób to w oparciu o juz policzoną część
 				# print(self.__time_all_process)
-				if not self.__time_start:
-					self.__time_start = time.time()
-				else:
-					self.__time_rest = (self.__list_before_max * (time.time() - self.__time_start) / (self.__list_before_max - len(self.__list_before))) - (time.time() - self.__time_start)
-					m, s = divmod(self.__time_rest, 60)
-					h, m = divmod(m, 60)
-					sys.stdout.write("Time left: [{:02.0f}h:{:02.0f}m:{:02.0f}s]                    ".format(h, m, s))
+				
 		return enc
 
 	def get_encrypt_list(self):
@@ -335,7 +336,7 @@ class DecryptSet:
 					m, s = divmod(self.__time_rest, 60)
 					h, m = divmod(m, 60)
 					sys.stdout.write(
-						"Time left: [{:02.0f}h:{:02.0f}m:{:02.0f}s]                    ".format(h, m, s))
+						"Time left: [{:02.0f}h:{:02.0f}m:{:02.0f}s]".format(h, m, s))
 		return dec
 	
 	def get_decrypt_list(self):
