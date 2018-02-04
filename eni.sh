@@ -44,20 +44,20 @@ echo "" >> test_5M.txt
 echo "--- Bash ---> Generate and save test_5M.txt"
 
 
-simnigma.py -K for_test_1024 1024
+simnigma.py -K for_test_1024 1024 -v
 simnigma.py -K for_test_2048 2048
 simnigma.py -R for_test_10 10
 simnigma.py -R for_test_100 100
 
-simnigma.py -c test_10k.txt
-simnigma.py -d test_10k.txt.enc
+simnigma.py -c test_10k.txt -v
+simnigma.py -d test_10k.txt.enc -v
 diff -sq test_10k.txt test_10k.txt.enc.dec |grep 'różnią się'
 simnigma.py -c test_1M.txt -k for_test_2048
 simnigma.py -d test_1M.txt.enc -k for_test_2048
 diff -sq test_1M.txt test_1M.txt.enc.dec |grep 'różnią się'
 
-simnigma.py -c test_5M.txt -k for_test_2048
-simnigma.py -d test_5M.txt.enc -k for_test_2048
+simnigma.py -c test_5M.txt -k for_test_2048 -v
+simnigma.py -d test_5M.txt.enc -k for_test_2048 -v
 diff -sq test_5M.txt test_5M.txt.enc.dec |grep 'różnią się'
 
 rm keys/for_test_*
