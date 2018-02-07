@@ -48,6 +48,7 @@
 import sys
 import os
 import glob
+import time
 
 from modules.__tools_single import bcolors
 from modules.test_print import test_print
@@ -283,11 +284,12 @@ if files_to_encrypt and only_screen:
 	while True:
 		try:
 			if text_before: text_before += '\n'
-			text_before += input('---> ')
+			text_before += input('<--- ')
 		except KeyboardInterrupt:
 			break
 		except EOFError:
 			break
+	if len(text_before) == 0: show_help('Text is empty')
 	os.system('setterm -cursor off')
 	text_before = convert_str_to_list(text_before)
 	text_encrypt = encrypt(rotors, key, text_before, show=True)
@@ -335,7 +337,10 @@ if files_to_decrypt and only_screen :
 		text_decrypt = text_decrypt.split('\n')
 		for line in text_decrypt:
 			print('---> ', line)
-
+		time.sleep(1)
+		for _ in range(1000): print('\n')
+		os.system('clear -h')
+		
 
 # creating and saving key and rotors
 if key_name_save:
@@ -378,3 +383,4 @@ exit()
 	
 
 # todo ---------- this part will be our playground :)----------
+

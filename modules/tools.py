@@ -674,6 +674,8 @@ Usage:      simnigma -c [file of files, you can use reg.]
             # todo simnigma -t --tests              Run tests encrypt and decrypt
             simnigma -h --help               Display this help and exit
             simnigma -V --version            Output version information and exit
+            
+   
    
 Examples:   simnigma.py -K your_key_name 2048
                 First you need to create a random key, 2048 it is size in bit
