@@ -177,10 +177,10 @@ if '-k' in sys.argv and key_name_load == ' ':
 	show_help("Name of key to load")
 if '-r' in sys.argv and rotors_name_load == ' ':
 	show_help("Name of rotors to load")
-if '-c' in sys.argv and len(files_to_encrypt) != 1 and only_screen:
-	show_help("Too many files to save if -s")
-if '-d' in sys.argv and len(files_to_decrypt) != 1 and only_screen:
-	show_help("Too many files to load if -s")
+# if '-c' in sys.argv and len(files_to_encrypt) != 1 and only_screen:
+# 	show_help("Too many files to save if -s")
+# if '-d' in sys.argv and len(files_to_decrypt) != 1 and only_screen:
+# 	show_help("Too many files to load if -s")
 if ('-c' in sys.argv or '-d' in sys.argv) and ('-K' in sys.argv or '-R' in sys.argv):
 	show_help("Too many options, at the same time you can't encrypt/decrypt and create key or rotors")
 if ('-K' in sys.argv or '-R' in sys.argv) and ('-s') in sys.argv:
@@ -278,24 +278,25 @@ if files_to_encrypt and not only_screen:
 		                    space=space)
 if files_to_encrypt and only_screen:
 	printd(files_to_encrypt, debug=debug)
-	print("Enter/Paste your content. Ctrl-D or Ctrl-C to save it.")
-	os.system('setterm -cursor on')
-	text_before = ''
-	while True:
-		try:
-			if text_before: text_before += '\n'
-			text_before += input('<--- ')
-		except KeyboardInterrupt:
-			break
-		except EOFError:
-			break
-	if len(text_before) == 0: show_help('Text is empty')
-	os.system('setterm -cursor off')
-	text_before = convert_str_to_list(text_before)
-	text_encrypt = encrypt(rotors, key, text_before, show=True)
-	save_file_all(files_to_encrypt[0] + '.enc', text_encrypt, 'file', True)
-	if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
-	                    show_all=True, show_uni=True)
+	for file_my in files_to_encrypt:
+		print("Enter/Paste your content. Ctrl-D or Ctrl-C to save it.")
+		os.system('setterm -cursor on')
+		text_before = ''
+		while True:
+			try:
+				if text_before: text_before += '\n'
+				text_before += input('<--- ')
+			except KeyboardInterrupt:
+				break
+			except EOFError:
+				break
+		if len(text_before) == 0: show_help('Text is empty')
+		os.system('setterm -cursor off')
+		text_before = convert_str_to_list(text_before)
+		text_encrypt = encrypt(rotors, key, text_before, show=True)
+		save_file_all(file_my + '.enc', text_encrypt, 'file', True)
+		if show: test_print(rotors=rotors, key_enc=key, text_before=text_before, text_encrypt=text_encrypt,
+		                    show_all=True, show_uni=True)
 	
 
 # decrypt file
@@ -303,7 +304,7 @@ if files_to_decrypt and not only_screen:
 	printd(files_to_decrypt, debug=debug)
 	for file_my in files_to_decrypt[:]:
 		if (not os.path.isfile(file_my) or (file_my[-4:] != '.enc')):
-			print(bcolors.IMPORTANT + 'Warning: "{}" this isn\'t a .enc file'.format(file_my) + bcolors.ENDC)
+			print(bcolors.IMPORTANT + 'Warning: "{}" this isn\'t a .enc file or doesn\' exist'.format(file_my) + bcolors.ENDC)
 			files_to_decrypt.remove(file_my)
 	for file_my in files_to_decrypt[:]:
 		if os.stat(str(os.path.abspath('') + '/' + file_my)).st_size > 0:
@@ -321,25 +322,32 @@ if files_to_decrypt and not only_screen:
 if files_to_decrypt and only_screen :
 	printd(files_to_decrypt, debug=debug)
 	for file_my in files_to_decrypt[:]:
+		if (not os.path.isfile(file_my) or (file_my[-4:] != '.enc')):
+			os.system('setterm -cursor on')
+			exit(bcolors.WARNING + '"{}" this isn\'t a .enc file or doesn\' exist'.format(file_my) + bcolors.ENDC)
+	for file_my in files_to_decrypt[:]:
 		if os.stat(str(os.path.abspath('') + '/' + file_my)).st_size > 0:
 			files_to_decrypt[files_to_decrypt.index(file_my)] = str(os.path.abspath('') + '/' + file_my)
 		else:
+			os.system('setterm -cursor on')
 			exit(bcolors.IMPORTANT + "Warning: Empty file {}".format(file_my) + bcolors.ENDC)
-	for file_my in files_to_decrypt[:]:
-		if (not os.path.isfile(file_my) or (file_my[-4:] != '.enc')):
-			exit(bcolors.WARNING + '"{}" this isn\'t a .enc file'.format(file_my) + bcolors.ENDC)
+	os.system('clear')
 	for file_my in files_to_decrypt:
 		text_encrypt = load_file_all(file_my, 'file', True)
 		text_decrypt = decrypt(rotors, key, text_encrypt, show=True)
-		if show: test_print(rotors=rotors, key_enc=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt,
-		                    show_all=True, show_uni=True)
+		if show:
+			test_print(rotors=rotors, key_enc=key, text_encrypt=text_encrypt, text_decrypt=text_decrypt,
+			           show_all=True, show_uni=True)
 		text_decrypt = convert_list_to_str(text_decrypt[:-1])
 		text_decrypt = text_decrypt.split('\n')
 		for line in text_decrypt:
 			print('---> ', line)
-		time.sleep(1)
+		for s in range(10, -1, -1):
+			print('\rIn ' + bcolors.WARNING + bcolors.BOLD + '{}s '.format(s) + bcolors.ENDC + 'message and file will be destroyed        ', end='')
+			time.sleep(1)
 		for _ in range(1000): print('\n')
-		os.system('clear -h')
+		os.system('rm ' + file_my)
+		os.system('clear')
 		
 
 # creating and saving key and rotors
