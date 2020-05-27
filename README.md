@@ -58,6 +58,14 @@ More examples:
 
 ```
 
+# Screenshots
+![Example screenshot](./screenshots/key.png)
+![Example screenshot](./screenshots/rotors.png)
+![Example screenshot](./screenshots/eprogress.png)
+![Example screenshot](./screenshots/encrypted.png)
+![Example screenshot](./screenshots/decrypted.png)
+![Example screenshot](./screenshots/all.png)
+
 
 ### Prerequisites
 
