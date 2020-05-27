@@ -1,6 +1,6 @@
 # Project Title
 
-Enigma on steroids
+Enigma on steroids.
 
 ## Getting Started
 My first learning project whose purpose was to implement Enigma cipher with many more combinations. Simple setup with 2048 key bit and with 100 rotors gives 2.96E+722 combinations. With -f switch we can much more cross this limit. Standard Enigma can give us 150 million combinations. 
@@ -59,7 +59,7 @@ More examples:
 
 ```
 
-# Screenshots
+## Screenshots
 ![Example screenshot](./screenshots/key.png)
 ![Example screenshot](./screenshots/rotors.png)
 ![Example screenshot](./screenshots/eprogress.png)
@@ -67,10 +67,10 @@ More examples:
 ![Example screenshot](./screenshots/decrypted.png)
 ![Example screenshot](./screenshots/all.png)
 
-# Tech_Stack 
+## Tech_Stack 
 * Python 
 
-### Installing
+## Installing
 
 A step by step series of examples that tell you have to get a development env running
 
