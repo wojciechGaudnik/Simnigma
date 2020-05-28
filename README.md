@@ -68,8 +68,9 @@ More examples:
 ![Example screenshot](./screenshots/eprogress.png)
 #### All info about encryption 
 ![Example screenshot](./screenshots/encrypted.png)
-#### 
+#### How decrypt file 
 ![Example screenshot](./screenshots/decrypted.png)
+#### Left before encrypt &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  middle after encrypt &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;right after decrypt 
 ![Example screenshot](./screenshots/all.png)
 
 ## Tech_Stack 
