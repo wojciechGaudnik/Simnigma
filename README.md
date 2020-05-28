@@ -60,10 +60,15 @@ More examples:
 ```
 
 ## Screenshots
+#### How create key
 ![Example screenshot](./screenshots/key.png)
+#### How create rotors 
 ![Example screenshot](./screenshots/rotors.png)
+#### How encrypt file 
 ![Example screenshot](./screenshots/eprogress.png)
+#### All info about encryption 
 ![Example screenshot](./screenshots/encrypted.png)
+#### 
 ![Example screenshot](./screenshots/decrypted.png)
 ![Example screenshot](./screenshots/all.png)
 
