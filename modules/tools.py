@@ -17,7 +17,7 @@ from .__tools_single import __cre_rotor, __save_rotor, __load_rotor, __check_ran
 from .core import EncryptNextRotor, EncryptSet, DecryptNextRotor, DecryptSet
 
 
-
+# test
 
 
 def create_rotors(size_in_bit, mix, number_of_rotors): # todo daj mix Tru i na koncu
