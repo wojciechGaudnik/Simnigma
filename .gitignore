@@ -141,3 +141,5 @@ dmypy.json
 cython_debug/
 
 .idea/inspectionProfiles/Project_Default.xml
+test200.rotors
+testKey4096.key
