@@ -3,7 +3,7 @@
 Enigma on steroids.
 
 ## Getting Started
-My first learning project whose purpose was to implement Enigma cipher with many more combinations. Simple setup with 2048 key bit and with 100 rotors gives 2.96E+722 combinations. With -f switch we can much more cross this limit. Standard Enigma can give us 150 million combinations. 
+My first learning project with purpose was to implement Enigma cipher with many more combinations. Simple setup with 2048 key bit and with 100 rotors gives 2.96E+722 combinations. With -f switch we can much more cross this limit. Standard Enigma can give us 150 million combinations. 
 Short pieces of information on how to use this script. 
 
 
