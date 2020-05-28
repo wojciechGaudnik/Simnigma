@@ -1,10 +1,7 @@
 # only functions for generating tools for individual elements
-# print("Hello From __tooles_single:      ", __name__)
 
 from random import shuffle, randint
 import pickle
-
-
 
 class bcolors:
 	WARNING = '\033[91m'
@@ -18,7 +15,7 @@ class bcolors:
 def __cre_rotor(size_in_max, mix):
 	dic = {}
 	for i in range(0, size_in_max):
-		dic[i] = i #todo tutaj bylo ";" ale po co ?!?!?
+		dic[i] = i
 	if mix:
 		shuffle(dic)
 	return dic
@@ -34,7 +31,7 @@ def __load_rotor(name):
 		return pickle.load(f)
 
 
-def __check_rand_rotor(rotor): #, debug):
+def __check_rand_rotor(rotor):
 	list_k = []
 	list_v = []
 	test = True #todo usuń i samo return zrób
@@ -78,10 +75,7 @@ def generate_from_64b_inter_key(key, rotors, show=False): # todo dlaczego nie mo
 			if str(num_in_DEC_from_64b)[i: 60 + i]:
 				print(str(num_in_DEC_from_64b)[i: 60 + i])
 			else:
-				# print("")
 				break
-	# print(str(num_in_DEC_from_64b)[i: 60 + i])
-	# rand_num_in_DEC_from_64b_save = num_in_DEC_from_64b
 
 	# Generate internal key from DEC
 	i = 0
@@ -94,7 +88,6 @@ def generate_from_64b_inter_key(key, rotors, show=False): # todo dlaczego nie mo
 			inter_key += [num_in_DEC_from_64b, ]
 			break
 		inter_key += [0]
-	# inter_key = inter_key[::-1]   # the number in the correct order, without this number, is invert
 	if len(inter_key) % len(rotors) != 0:
 		add_zeros = abs((len(inter_key) % len(rotors)) - len(rotors))
 		for _ in range(0, add_zeros):
@@ -115,7 +108,6 @@ def generate_from_64b_inter_key(key, rotors, show=False): # todo dlaczego nie mo
 		else:
 			print("\nPass")
 	return inter_key
-
 
 def __test():
 	print("test z __tools")

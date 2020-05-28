@@ -6,70 +6,6 @@ from modules.__tools_single import bcolors, generate_from_64b_inter_key
 from modules.tools import check_text_const, check_rand_rotors, check_patterns, \
 	check_all_patterns, calc_number_comb, print_long, key_from_64b_to_dec
 
-
-
-
-
-# # bit size of drums in bits
-# # drums_contents    "in order", "mixed up"
-# # drums_creation    "load", "generate", "generate and save"
-# # drums_check       "yes", "no"
-# drums_bit = 2
-# size_drums = 2 ** drums_bit
-# drums_contents = "in order"
-# drums_creation = "load"
-# drums_check = "yes"
-#
-# text_length = 0
-#
-# # "random", "min", "max"
-#
-# # first is a number of cycles,
-# # length is a number of drums
-# key_enc = [3, 1, 2, 2]  # 262144 wariacje
-# key_dec = [3, 1, 2, 2]
-#
-# # todo serious things happen here
-# size_drums = 2 ** drums_bit
-#
-#
-#
-#
-# # drum1 = {0 : 2,
-# #          1 : 0,
-# #          2 : 3,
-# #          3 : 1}
-# #
-# # drum2 = {0 : 3,
-# #          1 : 2,
-# #          2 : 0,
-# #          3 : 1}
-# #
-# # drum3 = {0 : 3,
-# #          1 : 0,
-# #          2 : 1,
-# #          3 : 2}
-# #
-# # drums = drum1, drum2, drum3
-# # print(drums)
-#
-# # save_rotors(drums, "./drums/set_drum_2b_")
-#
-# print(drum1, drum2, drum3)
-#
-#
-# # gen_text() #todo triple size !!!
-# # gen_text
-# text_before = gen_text(False, False, False, drum1, 0, 1000)
-# # text_before = [0, 1, 2, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0]
-# # text_before = [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]#, 0, 0, 0]
-# # text_before = [0, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-
-
-
-
-
 def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encrypt = [], text_decrypt = [],
                show_all=False, show_first=False, show_short=False, show_calc=False, show_uni=False, max_print_length = 110,
                min_print_length=15, space = 47):
@@ -80,15 +16,10 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 		key_enc = generate_from_64b_inter_key(key_enc, rotors)
 	if isinstance(key_dec, str):
 		key_dec = generate_from_64b_inter_key(key_dec, rotors)
-	# if text_before == []: text_before = text_encrypt[:]
-	
 		
 	# Checked length of the pattern
 	key = key_enc if key_enc else key_dec
 	cal_pattern_length = calc_number_comb(rotors, key)
-	
-	
-	
 	
 	if show_all or show_first:
 		# Print rotors
@@ -116,7 +47,7 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 	if show_all or show_short:
 		# Print short rotors info
 		print("Rotors size in bit:" + " " * (space - 19), "[" + str(int(log(len(rotors[0]), 2))) + " bit]")
-		print("Rotors, number existing:" + " " * (space - 24), "[" + str(len(rotors)) + " rotors]")  # number of exists rotors
+		print("Rotors, number existing:" + " " * (space - 24), "[" + str(len(rotors)) + " rotors]")
 		key_len = len(key_enc) if key_enc else len(key_dec)
 		for i in range(len(rotors), 0, -1):
 			if key_len % i == 0:
@@ -124,11 +55,11 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 				print("Number of passes:" + " " * (space - 17), "[" + str(key_len // i) + " passes]")
 				break
 		print("Rotors, number of key-val:" + " " * (space - 26), "[" + format(decimal.Decimal(len(rotors[0])), '.2E') + "]")
-		if check_rand_rotors(rotors): # był wybrany tylko 1 DLACZEGO !?
+		if check_rand_rotors(rotors):
 			print("Minimum value in rotor:" + " " * (space - 22) + "[" + str(min(rotors[0])) + " min]")
 			print("Maximum value in rotor:" + " " * (space - 22) + "[" + str(max(rotors[0])) + " max]")
 			print("Equality test of rotors:" + " " * (space - 23) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
-			if check_rand_rotors(rotors): # był wybrany tylko 1 i do tego kolejny a nie 0 jak poprzednio DLACZEGO !?
+			if check_rand_rotors(rotors):
 				print("Randomness and integrity rotor test:" + " " * (space - 35) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
 			else:
 				print("Randomness and integrity rotor test:" + " " * (space - 35) + "[" + bcolors.WARNING + bcolors.BOLD + "FAIL" + bcolors.ENDC + "]")
@@ -147,29 +78,16 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 		if (key_enc) and (key_dec):
 			print("Key the same:" + " " * (space - 12) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]") if (key_enc == key_dec)  else \
 				print("Key the same:" + " " * (space - 12) + "[" + bcolors.ORANGE + "FAIL" + bcolors.ENDC + "]")
-		
-		
+
 		# Print short text info
 		print("Text before length:" + " " * (space - 18) + "[" + format(decimal.Decimal(len(text_before or text_encrypt)), '.2E') + "]")
 		print("Text before constant:" + " " * (space - 20) + "[{}]".format("Yes" if check_text_const(text_before or text_encrypt) else "No"))
 	
-	# # Calculated variations with repetitions
-	# cal_name_length = "Calculated variations with repetitions:\t\t\t"
-	# print(cal_name_length + "[" + format(decimal.Decimal(cal_pattern_length), '.2E') + "]")
-	
-	
 	if show_all or show_calc:
 		if text_before != [] and check_text_const(text_before):
-			# check_name_length = "Checked length of the pattern:\t\t\t\t\t"
 			if len(text_encrypt) > cal_pattern_length * 3:
 				patterns_over = check_patterns(text_encrypt, cal_pattern_length // 2, 1, True)
-				# print("Patterns over, only first:" + " " * 21, [x for x in patterns_over[0: 1]])
 				check_all_patterns(text_encrypt, 4, patterns_over[0][0] -1 , 3, 2, patterns_over, True)
-				
-				# def check_all_patterns(text_encrypt, min_pattern, max_pattern, max_num_patterns=1, del_patterns=[], show=False, mark=-1):  # todo make optimizations
-				
-				# patterns_all = check_all_patterns(text_encrypt, 4, cal_pattern_length, 3, check_patterns(text_encrypt))
-				# print("Patterns 3 shorter:" + " " * 28, patterns_all)
 				name = "Calculated and checked pattern test:"
 				if cal_pattern_length == patterns_over[0][0]:
 					print(name + " " * (space - 35) + "[" + bcolors.BOLD + "PASS" + bcolors.ENDC + "]")
@@ -177,7 +95,6 @@ def test_print(rotors, key_enc = [], key_dec = [], text_before = [], text_encryp
 					print(name + " " * (space - 35) + "[" + bcolors.BOLD + bcolors.WARNING + "FAIL" + bcolors.ENDC + "]")
 			else:
 				print("Patterns over:" + " " * (space - 13) + "[Text to short]")
-	
 	
 	# Calculated number of combination
 	cal_name_length = "Calculated number of combination:" + " " * (space - 32)

@@ -1,50 +1,5 @@
 #!/usr/bin/python3
 
-
-# check -f force mode in case of file over 1M
-# todo key from screen and save ?
-# todo change rotors order and save ?
-# todo print and check rotors and key, rotors all or one
-# todo szerokosci zcreeinu dobiera szerokosc printu albo error
-# todo --config rotors order, max i min length
-# todo przenieś z generatorów kluczy funkcje zmieniaja ce 64b na DEC itp do __Tools_single
-# todo komentarze
-
-
-# todo niesymetryczna kolejnosc przejsc przez rotorsy
-# todo szyfrowanie plikow txt tylko na rotorsach do txt
-# todo zamykaj kluczem RSA
-# todo dorób rekurenje do wychodzenia w katalogu ponad ../
-# todo zrób mozliwość szyfrowania ponad 8b rotors https://docs.python.org/2/library/struct.html
-# todo zrób to na https://stormpath.com/blog/building-simple-cli-interfaces-in-python
-# todo przerywanie szukania paternów klawiszem ew. po czasie
-# todo popraw gen_text
-# todo timingi do optymalizacji dorub
-# todo timingi zrób dekoratorami ?
-# todo dlaczego jeśli podaję do metody listę def bleble(self, cos_tam)
-# todo      to nie mogę pracować na coś tam i jej zwrucić ?
-# a zmien klucz 1 liczkbe
-# generate or load new dict
-# ogranicz wielkosc slownika do tłumaczenia
-# generate drum wyeliminuj dic losowe w kolejności przypadkiem zrobione
-# czas pozostały do zaszyfrowania odszyfrowania
-# simnigma
-# obsługę wyjątków
-# rotors rozzezenie na rot zroó” !!
-# rotors w 1 pliku
-# print_all true or false
-# printowanie przebiegu procesu
-# przeszukiwanie wzorców max i min albo podział łancucha albo dzielenie przez więcej niż 2
-# cycles w kluczu zrób tak żeby 1 znaczyło 1 cykl 2 dwa itd chyba juz jest ?!
-# ostatnie wartosci kluczy mogą być wieksze niż max z dic !!!
-# key przenieś do metody -1i zamien z hex na liste
-# generator klucza do ilosci przejść i bębnów zrub
-# karetkę bardziej widoczną zrób
-# dorub sprwadzanie max i min słownika czy jest OK i print
-# print only 2 decimals
-# how to division with out decimal
-# drums ---> rotors drum ---> drum
-
 import sys
 import os
 import glob
@@ -53,15 +8,9 @@ import time
 from modules.__tools_single import bcolors
 from modules.test_print import test_print
 from modules.tools import (encrypt, decrypt, load_file_all, save_file_all, convert_str_to_list, convert_list_to_str,
-                           create_random_64b_key, key_from_64b_to_dec, check_64b_key,
+                           create_random_64b_key, check_64b_key,
                            create_rotors, check_rand_rotors,
                            print_long, show_help, printd)
-
-
-
-# print(sys.argv)
-# exit()
-
 
 version = '5.0.0'
 options = sys.argv + [' ',]
@@ -177,10 +126,6 @@ if '-k' in sys.argv and key_name_load == ' ':
 	show_help("Name of key to load")
 if '-r' in sys.argv and rotors_name_load == ' ':
 	show_help("Name of rotors to load")
-# if '-c' in sys.argv and len(files_to_encrypt) != 1 and only_screen:
-# 	show_help("Too many files to save if -s")
-# if '-d' in sys.argv and len(files_to_decrypt) != 1 and only_screen:
-# 	show_help("Too many files to load if -s")
 if ('-c' in sys.argv or '-d' in sys.argv) and ('-K' in sys.argv or '-R' in sys.argv):
 	show_help("Too many options, at the same time you can't encrypt/decrypt and create key or rotors")
 if ('-K' in sys.argv or '-R' in sys.argv) and ('-s') in sys.argv:
@@ -388,7 +333,3 @@ if rotors_name_save:
 	
 os.system('setterm -cursor on')
 exit()
-	
-
-# todo ---------- this part will be our playground :)----------
-
