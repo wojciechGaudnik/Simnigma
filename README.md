@@ -83,6 +83,7 @@ A step by step series of examples that tell you have to get a development env ru
 Say what the step will be
 
 ```
+git clone https://github.com/wojciechGaudnik/Simnigma
 chmode + x simnigma
 
 ```
